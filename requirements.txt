@@ -1,6 +1,4 @@
 argparse
 cfscrape
-zlib
 glob
 shutil
-base64
