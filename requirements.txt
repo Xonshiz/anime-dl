@@ -1,0 +1,7 @@
+argparse
+hashlib
+cfscrape
+zlib
+glob
+shutil
+base64
