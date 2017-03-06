@@ -49,10 +49,12 @@ The instructions for all the OS would remain same. Download [`THIS REPOSITORY`](
 **Linux/Debian** users make sure that this script is executable.just run this command, if you run into problem(s) :
 
 `chmod +x anime-dl.py`
+`chmod +x __main__.py`
 
 and then, execute with this :
 
 `./anime-dl.py`
+`./__main__.py`
 
 ## Python Support
 This script supports only Pythom 3 currently..
@@ -94,7 +96,7 @@ After you've saved this script in a directory/folder, you need to open `command 
 
 *If you're using the Python Script :*
 
-`anime-dl.py -i "<URL TO THE ANIME>" -u "YourUsername" -p "Password" -r "Resolution"`
+`__main__.py -i "<URL TO THE ANIME>" -u "YourUsername" -p "Password" -r "Resolution"`
 
 URL can be any URL of the [supported websites](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
 
@@ -104,7 +106,7 @@ After you've saved this script in a directory/folder, you need to open `command 
 * Now, change the current working directory of the terminal to the one where you've downloaded this repository.
 * Now, in the Terminal, type this :
 
-`anime-dl.py -i "<URL TO THE ANIME>" -u "YourUsername" -p "Password" -r "Resolution"`
+`__main__.py -i "<URL TO THE ANIME>" -u "YourUsername" -p "Password" -r "Resolution"`
 
 URL can be any URL of the [supported websites](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
 

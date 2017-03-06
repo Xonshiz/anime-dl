@@ -60,3 +60,4 @@ Temporary Items
 *.iml
 anime_dl/build/__main__/warn__main__.txt
 *.ass
+*.mp4
