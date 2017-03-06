@@ -1,4 +1,4 @@
-import anime_dl.external.aes
-import anime_dl.external.compat
-import anime_dl.external.socks
-import anime_dl.external.utils
+import external.aes
+import external.compat
+import external.socks
+import external.utils

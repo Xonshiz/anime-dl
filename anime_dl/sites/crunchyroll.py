@@ -3,13 +3,13 @@
 
 from cfscrape import create_scraper
 from requests import session
-from re import search, findall
+from re import search, findall, match
 from os import getcwd
 from subprocess import call
 # External libs have been taken from youtube-dl for decoding the subtitles.
-from anime_dl.external.utils import bytes_to_intlist, intlist_to_bytes
-from anime_dl.external.aes import aes_cbc_decrypt
-from anime_dl.external.compat import compat_etree_fromstring
+from external.utils import bytes_to_intlist, intlist_to_bytes
+from external.aes import aes_cbc_decrypt
+from external.compat import compat_etree_fromstring
 import zlib
 import base64
 from hashlib import sha1
@@ -17,14 +17,26 @@ from math import pow, sqrt, floor
 from os import path, makedirs
 from glob import glob
 from shutil import move
+from sys import exit
 
 
 class CrunchyRoll(object):
-    def __init__(self, url, password, username, resolution):
-        # cookies + Token are required to login after CR put their login page behind CloudFlare.
-        cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
-        self.singleEpisode(
-            url=url, cookies=cookies, token=Token, resolution=resolution)
+    def __init__(self, url, password, username, resolution, language):
+
+        Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
+        Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
+
+        Crunchy_Show = match(Crunchy_Show_regex, url)
+        Crunchy_Video = match(Crunchy_Video_regex, url)
+
+        if Crunchy_Video:
+            cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
+            self.singleEpisode(
+                url=url, cookies=cookies, token=Token, resolution=resolution)
+        elif Crunchy_Show:
+
+            cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
+            self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution)
 
     def loginCheck(self, htmlsource):
         # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
@@ -38,7 +50,7 @@ class CrunchyRoll(object):
             return False
 
     def webpagedownloader(self, url, username, password):
-        print(username, password)
+
         headers = {
             'User-Agent':
             'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
@@ -349,6 +361,10 @@ class CrunchyRoll(object):
 
         return (video_id, m3u8_link_raw, anime_name, episode_number, width,
                 height, file_name, cookies, token)
+
+    def wholeShow(self, url, cookie, token, language, resolution):
+
+        print("Please check my Patreon : https://patreon.com/Xonshiz")
 
     def subFetcher(self, xml, anime_name, episode_number):
         headers = {

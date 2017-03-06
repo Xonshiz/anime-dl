@@ -6,9 +6,10 @@ __author__ = "Xonshiz"
 __email__ = "xonshiz@psychoticelites.com"
 """
 
-import anime_dl.AnimeDL
-# import sys
-from anime_dl.version import __version__
+from AnimeDL import *
+# from anime_dl import AnimeDL
+from sys import exit
+from version import __version__
 import argparse
 
 
@@ -44,4 +45,4 @@ class main(object):
             if type(args.language) == list:
                 args.language = args.language[0]
 
-                anime_dl.AnimeDL.AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language)
+            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language)

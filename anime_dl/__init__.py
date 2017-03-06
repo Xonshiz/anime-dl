@@ -1,2 +1,2 @@
-import anime_dl.sites
-import anime_dl.external
+import sites
+import external

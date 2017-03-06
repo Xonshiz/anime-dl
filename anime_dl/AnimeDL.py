@@ -6,8 +6,9 @@ try:
     from urllib.parse import urlparse
 except ImportError:
      from urlparse import urlparse
-import anime_dl.sites
+import sites
 from re import match
+from sys import exit
 
 
 class AnimeDL(object):
@@ -21,15 +22,9 @@ class AnimeDL(object):
                 print("Please enter the required arguments. Run __main__.py --help")
                 exit()
             else:
-                Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
-                Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
-                Crunchy_Show = match(Crunchy_Show_regex, url[0])
-                Crunchy_Video = match(Crunchy_Video_regex, url[0])
-                if Crunchy_Video:
-                    anime_dl.sites.crunchyroll.CrunchyRoll(
-                        url=url[0], password=password, username=username, resolution=resolution)
-                elif Crunchy_Show:
-                    anime_dl.sites.crunchywhole.crunchyRollWhole()
+
+                sites.crunchyroll.CrunchyRoll(
+                    url=url[0], password=password, username=username, resolution=resolution, language=language)
 
     def honcho(self, url):
         # print("Got url : %s" % url)
@@ -39,7 +34,7 @@ class AnimeDL(object):
         # print(domain)
 
         if domain in ["www.funimation.com", "funimation.com"]:
-            anime_dl.sites.funimation.Funimation()
+            sites.funimation.Funimation()
 
         elif domain in ["www.crunchyroll.com", "crunchyroll.com"]:
             return "Crunchyroll"

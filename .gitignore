@@ -56,3 +56,7 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.spec
+*.iml
+anime_dl/build/__main__/warn__main__.txt
+*.ass

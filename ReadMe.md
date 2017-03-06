@@ -6,6 +6,8 @@ Anime-dl is a Command-line program to download anime from CrunchyRoll and Funima
 
 > Support these anime streaming websites by buying a premium account.
 
+> Taking some libs directly from youtube-dl to decrypt CrunchyRoll's subtitles.
+
 ## Table of Content
 
 * [Supported Sites](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md)
