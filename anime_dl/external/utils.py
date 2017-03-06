@@ -34,7 +34,7 @@ import traceback
 import xml.etree.ElementTree
 import zlib
 
-from compat import (
+from external.compat import (
     compat_HTMLParser,
     compat_basestring,
     compat_chr,
@@ -60,7 +60,7 @@ from compat import (
     compat_xpath,
 )
 
-from socks import (
+from external.socks import (
     ProxyType,
     sockssocket,
 )
