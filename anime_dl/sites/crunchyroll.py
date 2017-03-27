@@ -363,8 +363,52 @@ class CrunchyRoll(object):
                 height, file_name, cookies, token)
 
     def wholeShow(self, url, cookie, token, language, resolution):
+    	# print("Check my patreon for this : http://patreon.com/Xonshiz")
 
-        print("Please check my Patreon : https://patreon.com/Xonshiz")
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/601.2.7 (KHTML, like Gecko) Version/9.0.1 Safari/601.2.7',
+            'Upgrade-Insecure-Requests': '1',
+            'Accept-Encoding': 'gzip, deflate'
+        }
+
+        sess = session()
+        sess = create_scraper(sess)
+        page_source = sess.get(url=url, headers=headers, cookies=cookie).text
+
+        dub_list = []
+        sub_list = []
+        for episode_link, episode_type in findall(r'\<a href\=\"\/(.*?)\"\ title\=\"(.*?)\"\ class\=\"portrait\-element\ block\-link', str(page_source)):
+            if "(Dub)" in str(episode_type):
+                dub_list.append(str(url) + str(episode_link))
+            else:
+                sub_list.append(str(url) + str(episode_link))
+
+        if len(dub_list) == 0 and len(sub_list) == 0:
+            print("Could not find the show links. Report on https://github.com/Xonshiz/anime-dl/issues/new")
+            exit()
+
+        if str(language).lower() in ["english", "eng", "dub"]:
+            # If the "dub_list" is empty, that means there are no English Dubs for the show, or CR changed something.
+            if len(dub_list) == 0:
+                print("No English Dub Available For This Series.")
+                print("If you can see the Dubs, please open an Issue on https://github.com/Xonshiz/anime-dl/issues/new")
+                exit()
+            else:
+                print("Total Episodes to download : %s" % len(dub_list))
+                for episode_url in dub_list[::-1]:
+                    # cookies, Token = self.webpagedownloader(url=url)
+                    # print("Dub list : %s" % dub_list)
+                    self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                    print("-----------------------------------------------------------")
+                    print("\n")
+        else:
+            print("Total Episodes to download : %s" % len(sub_list))
+            for episode_url in sub_list[::-1]:
+                # cookies, Token = self.webpagedownloader(url=url)
+                # print("Sub list : %s" % sub_list)
+                self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                print("-----------------------------------------------------------")
+                print("\n")
 
     def subFetcher(self, xml, anime_name, episode_number):
         headers = {

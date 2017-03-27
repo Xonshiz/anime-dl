@@ -24,7 +24,7 @@ class main(object):
         required_args.add_argument('-u', '--username', nargs=1, help='Indicates username for a website.')
         required_args.add_argument('-i', '--input', nargs=1, help='Inputs the URL to anime.')
         parser.add_argument('-r', '--resolution', nargs=1, help='Inputs the URL to anime.', default='720p')
-        parser.add_argument('-l', '--language', nargs=1, help='Inputs the URL to anime.', default='Japanese')
+        parser.add_argument('-l', '--language', nargs=1, help='Selects the language for the show.', default='Japanese')
 
         args = parser.parse_args()
 

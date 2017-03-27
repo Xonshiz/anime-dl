@@ -19,6 +19,7 @@ Anime-dl is a Command-line program to download anime from CrunchyRoll and Funima
 * [Usage](#usage)
     * [Windows](#windows)
     * [Linux/Debian](#linuxdebian)
+    * [Example URLs](#example-urls)
 * [Features](#features)
 * [Changelog](https://github.com/Xonshiz/anime-dl/blob/master/Changelog.md)
 * [Opening An Issue/Requesting A Site](#opening-an-issuerequesting-a-site)
@@ -76,7 +77,8 @@ Currently, the script supports these arguments :
 -V,--version                           Prints the VERSION and exits.
 -u,--username                          Indicates username for a website.
 -p,--password                          Indicates password for a website.
--r,--resolution                        Indicates the desired resolution (default = 720p)
+-r,--resolution                        Indicates the desired resolution. (default = 720p)
+-l,--language                          Selects the language for the show. (default = Japanese) [Langs = english, dub, sub, Japanese, eng]
 ```
 
 ## Usage
@@ -109,6 +111,12 @@ After you've saved this script in a directory/folder, you need to open `command 
 `__main__.py -i "<URL TO THE ANIME>" -u "YourUsername" -p "Password" -r "Resolution"`
 
 URL can be any URL of the [supported websites](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
+
+### Example URLs
+* Crunchyroll :
+    * Single Episode : [http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying/episode-13-happy-days-678059](http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying/episode-13-happy-days-678059)
+    * Whole Show : [http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying](http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying)
+
 
 ## Features
 This is a very basic and small sript, so at the moment it only have a few features.
