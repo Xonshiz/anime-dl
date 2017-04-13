@@ -6,3 +6,5 @@
 - ReadMe updated for Python Script execution [2017.03.06]
 - Support for Whole Show Downloading for Crunchyroll [2017.03.06]
 - Selection of language for the Crunchyroll Show [2017.03.06]
+- Downloading only subtitles (skip video downloads) [2017.04.13]
+- Fix for [6](https://github.com/Xonshiz/anime-dl/issues/6) and Fix for [3](https://github.com/Xonshiz/anime-dl/issues/3) [2017.04.13]

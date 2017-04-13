@@ -31,13 +31,13 @@ Anime-dl is a Command-line program to download anime from CrunchyRoll and Funima
 You can check the list of supported websites [**`HERE`**](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
 
 ## Dependencies Installation
-This script can run on multiple Operating Systems. So, if you're using the `python` script instead of the `windows binary` of this script, then you'll need to get things ready first. Since this script doesn't rely on a lot of external dependencies, you just need to grab a few things, same for all operating systems.
+This script can run on multiple Operating Systems. But, the script depends on some external binaries or libs. We need `FFmpeg` and `Node.js` in our paths.
 
 1.) Make sure you have Python installed and is present in your system's path.
 
-2.) Grab [FFmpeg from this link.](https://ffmpeg.org/download.html)
+2.) Grab [FFmpeg from this link](https://ffmpeg.org/download.html) and [Node.js from this link](https://nodejs.org/en/download/).
 
-3.) Install FFmpeg and place it in the directory of this script, or put FFmpeg in your system's path.
+3.) Install FFmpeg and Node.js and place it in the directory of this script, or put them in your system's path.
 
 4.) Browse to the directory of this script and open command prompt/shell in that directory and run this command :
 
@@ -49,7 +49,7 @@ python pip install -r requirements.txt
 After installing and setting up all the dependencies in your Operating System, you're good to go and use this script.
 The instructions for all the OS would remain same. Download [`THIS REPOSITORY`](https://github.com/Xonshiz/anime-dl/archive/master.zip) and put it somewhere in your system. Move over the `anime_dl` folder.
 
-**Windows users**, it's better to not place it places where it requires administrator privileges. Good example of such place would be `C:\Windows`. This goes for both, the Python script and the windows binary file (.exe).
+**Windows users**, it's better to not place it places where it requires administrator privileges. Good example of places to avoid would be `C:\Windows` etc.. This goes for both, the Python script and the windows binary file (.exe).
 
 **Linux/Debian** users make sure that this script is executable.Just run this command, if you run into problem(s) :
 
@@ -58,8 +58,6 @@ The instructions for all the OS would remain same. Download [`THIS REPOSITORY`](
 `chmod +x __main__.py`
 
 and then, execute with this :
-
-`./anime-dl.py`
 
 `./__main__.py`
 
@@ -84,6 +82,7 @@ Currently, the script supports these arguments :
 -u,--username                          Indicates username for a website. [REQUIRED]
 -p,--password                          Indicates password for a website. [REQUIRED]
 -r,--resolution                        Indicates the desired resolution. (default = 720p)
+--skip                                 Skip video downloads (Will only download subtitles)
 -l,--language                          Selects the language for the show. (default = Japanese) [Langs = english, dub, sub, Japanese, eng]
 ```
 
@@ -141,7 +140,7 @@ If your're planning to open an issue for the script or ask for a new feature or 
 ### Reporting Issues
 PLEASE RUN THIS SCRIPT IN A COMMAND LINE (as mentioned in the Usage section) AND DON'T SAY THAT `THE SCRIPT CLOSED TOO QUICK, I COULDN'T SEE`.
 
-If you're here to make suggestions, please follow the basic syntax to post a request :
+If you're here to report an issue, please follow the basic syntax to post a request :
 
 **Subject** : Error That You Get.
 

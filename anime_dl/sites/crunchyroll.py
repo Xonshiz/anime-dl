@@ -3,9 +3,9 @@
 
 from cfscrape import create_scraper
 from requests import session
-from re import search, findall, match
+from re import search, findall, match, sub
 from os import getcwd
-from subprocess import call
+from subprocess import call, check_output
 # External libs have been taken from youtube-dl for decoding the subtitles.
 from external.utils import bytes_to_intlist, intlist_to_bytes
 from external.aes import aes_cbc_decrypt
@@ -21,7 +21,7 @@ from sys import exit
 
 
 class CrunchyRoll(object):
-    def __init__(self, url, password, username, resolution, language):
+    def __init__(self, url, password, username, resolution, language, skipper):
 
         Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
         Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
@@ -31,12 +31,15 @@ class CrunchyRoll(object):
 
         if Crunchy_Video:
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
-            self.singleEpisode(
-                url=url, cookies=cookies, token=Token, resolution=resolution)
+            if skipper == "yes":
+                self.onlySubs(url=url, cookies=cookies)
+            else:
+                self.singleEpisode(
+                    url=url, cookies=cookies, token=Token, resolution=resolution)
         elif Crunchy_Show:
 
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
-            self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution)
+            self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution, skipper=skipper)
 
     def loginCheck(self, htmlsource):
         # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
@@ -134,9 +137,18 @@ class CrunchyRoll(object):
                     1)).strip()
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = str(anime_name) + " - " + str(
+            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
             # print("File Name : %s\n" % file_name)
+
+            try:
+                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
+                #print(MAX_PATH)
+            except (Exception):
+                MAX_PATH = 4096
+
+            if len(file_name) > MAX_PATH:
+                file_name = file_name[:MAX_PATH]
 
             if not path.exists("Output"):
                 makedirs("Output")
@@ -196,9 +208,17 @@ class CrunchyRoll(object):
                     1)).strip()
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = str(anime_name) + " - " + str(
+            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
             # print("File Name : %s\n" % file_name)
+            try:
+                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
+                #print(MAX_PATH)
+            except (Exception):
+                MAX_PATH = 4096
+
+            if len(file_name) > MAX_PATH:
+                file_name = file_name[:MAX_PATH]
 
             if not path.exists("Output"):
                 makedirs("Output")
@@ -258,9 +278,18 @@ class CrunchyRoll(object):
                     1)).strip()
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = str(anime_name) + " - " + str(
+            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
             # print("File Name : %s\n" % file_name)
+
+            try:
+                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
+                #print(MAX_PATH)
+            except (Exception):
+                MAX_PATH = 4096
+
+            if len(file_name) > MAX_PATH:
+                file_name = file_name[:MAX_PATH]
 
             if not path.exists("Output"):
                 makedirs("Output")
@@ -320,9 +349,18 @@ class CrunchyRoll(object):
                     1)).strip()
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = str(anime_name) + " - " + str(
+            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
             # print("File Name : %s\n" % file_name)
+
+            try:
+                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
+                #print(MAX_PATH)
+            except (Exception):
+                MAX_PATH = 4096
+
+            if len(file_name) > MAX_PATH:
+                file_name = file_name[:MAX_PATH]
 
             if not path.exists("Output"):
                 makedirs("Output")
@@ -362,7 +400,7 @@ class CrunchyRoll(object):
         return (video_id, m3u8_link_raw, anime_name, episode_number, width,
                 height, file_name, cookies, token)
 
-    def wholeShow(self, url, cookie, token, language, resolution):
+    def wholeShow(self, url, cookie, token, language, resolution, skipper):
     	# print("Check my patreon for this : http://patreon.com/Xonshiz")
 
         headers = {
@@ -387,28 +425,38 @@ class CrunchyRoll(object):
             print("Could not find the show links. Report on https://github.com/Xonshiz/anime-dl/issues/new")
             exit()
 
-        if str(language).lower() in ["english", "eng", "dub"]:
-            # If the "dub_list" is empty, that means there are no English Dubs for the show, or CR changed something.
-            if len(dub_list) == 0:
-                print("No English Dub Available For This Series.")
-                print("If you can see the Dubs, please open an Issue on https://github.com/Xonshiz/anime-dl/issues/new")
-                exit()
-            else:
-                print("Total Episodes to download : %s" % len(dub_list))
-                for episode_url in dub_list[::-1]:
-                    # cookies, Token = self.webpagedownloader(url=url)
-                    # print("Dub list : %s" % dub_list)
-                    self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
-                    print("-----------------------------------------------------------")
-                    print("\n")
-        else:
-            print("Total Episodes to download : %s" % len(sub_list))
+        if skipper == "yes":
+            # print("DLing everything")
+            print("Total Subs to download : %s" % len(sub_list))
             for episode_url in sub_list[::-1]:
                 # cookies, Token = self.webpagedownloader(url=url)
                 # print("Sub list : %s" % sub_list)
-                self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                self.onlySubs(url=episode_url, cookies=cookie)
                 print("-----------------------------------------------------------")
                 print("\n")
+        else:
+            if str(language).lower() in ["english", "eng", "dub"]:
+                # If the "dub_list" is empty, that means there are no English Dubs for the show, or CR changed something.
+                if len(dub_list) == 0:
+                    print("No English Dub Available For This Series.")
+                    print("If you can see the Dubs, please open an Issue on https://github.com/Xonshiz/anime-dl/issues/new")
+                    exit()
+                else:
+                    print("Total Episodes to download : %s" % len(dub_list))
+                    for episode_url in dub_list[::-1]:
+                        # cookies, Token = self.webpagedownloader(url=url)
+                        # print("Dub list : %s" % dub_list)
+                        self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                        print("-----------------------------------------------------------")
+                        print("\n")
+            else:
+                print("Total Episodes to download : %s" % len(sub_list))
+                for episode_url in sub_list[::-1]:
+                    # cookies, Token = self.webpagedownloader(url=url)
+                    # print("Sub list : %s" % sub_list)
+                    self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                    print("-----------------------------------------------------------")
+                    print("\n")
 
     def subFetcher(self, xml, anime_name, episode_number):
         headers = {
@@ -445,12 +493,59 @@ class CrunchyRoll(object):
             lang_code = str(
                 search(r'lang_code\=\"(.*?)\"', str(subtitle)).group(
                     1)).strip()
-            sub_file_name = str(anime_name) + " - " + str(
+            sub_file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + ".%s.ass" % lang_code
+
+            try:
+                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
+                #print(MAX_PATH)
+            except (Exception):
+                MAX_PATH = 4096
+
+            if len(sub_file_name) > MAX_PATH:
+                sub_file_name = sub_file_name[:MAX_PATH]
             # print(sub_file_name)
             print("Writing subtitles to files...")
             with open(sub_file_name, "w", encoding="utf-8") as sub_file:
                 sub_file.write(str(sub_data))
+
+    def onlySubs(self, url, cookies):
+        # print("Running only subs")
+        current_directory = getcwd()
+        video_id = str(url.split('-')[-1]).replace("/", "")
+        # print("URL : %s\nCookies : %s\nToken : %s\nResolution : %s\nMedia ID : %s" % (url, cookies, token, resolution, video_id))
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/601.2.7 (KHTML, like Gecko) Version/9.0.1 Safari/601.2.7',
+            'Upgrade-Insecure-Requests': '1',
+            'Accept-Encoding': 'gzip, deflate'
+        }
+
+        sess = session()
+        sess = create_scraper(sess)
+        infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
+        video_id, url)
+        xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text
+
+        m3u8_link_raw = str(search(r'\<file\>(.*?)\<\/file\>', xml_page).group(1)).strip().replace("&amp;", "&")
+        anime_name = str(search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page).group(1)).strip().replace("â",
+                                                                                                                "'").replace(
+            ":", " - ").replace("&#039;", "'")
+        episode_number = str(search(r'\<episode_number\>(.*?)\<\/episode_number\>', xml_page).group(1)).strip()
+        width = str(search(r'\<width\>(.*?)\<\/width\>', xml_page).group(1)).strip()
+        height = str(search(r'\<height\>(.*?)\<\/height\>', xml_page).group(1)).strip()
+        # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
+        if not path.exists("Output"):
+            makedirs("Output")
+
+        self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
+
+        for mkv_file in glob("*.ass"):
+            try:
+                move(mkv_file, current_directory + "/Output/")
+            except Exception as e:
+                print("Couldn't move the file. Got following error : \n")
+                print(e)
+                pass
 
     def _decrypt_subtitles(self, data, iv, id):
         data = bytes_to_intlist(base64.b64decode(data.encode('utf-8')))

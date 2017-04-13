@@ -25,12 +25,20 @@ class main(object):
         required_args.add_argument('-i', '--input', nargs=1, help='Inputs the URL to anime.')
         parser.add_argument('-r', '--resolution', nargs=1, help='Inputs the URL to anime.', default='720p')
         parser.add_argument('-l', '--language', nargs=1, help='Selects the language for the show.', default='Japanese')
+        parser.add_argument('--skip', action='store_true', help='skips the video download and downloads only subs.')
 
         args = parser.parse_args()
 
         if args.version:
             print("Current Version : %s" % __version__)
             exit()
+        if args.skip:
+            print("Will be skipping video downloads")
+            skipper = "yes"
+        elif not args.skip:
+            # print("No skipper")
+            skipper = "no"
+
         if args.username == None or args.password == None or args.input == None:
             print("Please enter the required arguments. Run __main__.py --help")
             exit()
@@ -45,4 +53,4 @@ class main(object):
             if type(args.language) == list:
                 args.language = args.language[0]
 
-            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language)
+            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language, skipper=skipper)
