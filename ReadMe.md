@@ -67,9 +67,9 @@ This script supports only Pythom 3 currently..
 ## Windows Binary
 It is recommended that windows users use this binary to save both, your head and time from installing all the dependencies. 
 
-You need to download [FFmpeg](https://ffmpeg.org/download.html) and keep it in the same directory as that of this windows binary file.
+You need to download [FFmpeg](https://ffmpeg.org/download.html) and [Node.js](https://nodejs.org/en/download/) and keep them in the same directory as that of this windows binary file.
 
-If you already have it, then you can download this binary and start using the script right off the bat :
+If you already have these dependencies, then you can download this binary and start using the script right off the bat :
 * `Binary (x86)` : [Click Here](https://github.com/Xonshiz/anime-dl/releases/latest)
 
 
