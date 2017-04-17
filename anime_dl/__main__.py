@@ -11,6 +11,8 @@ from AnimeDL import *
 from sys import exit
 from version import __version__
 import argparse
+import logging
+import platform
 
 
 class main(object):
@@ -26,8 +28,19 @@ class main(object):
         parser.add_argument('-r', '--resolution', nargs=1, help='Inputs the URL to anime.', default='720p')
         parser.add_argument('-l', '--language', nargs=1, help='Selects the language for the show.', default='Japanese')
         parser.add_argument('--skip', action='store_true', help='skips the video download and downloads only subs.')
-
+        parser.add_argument("-v", "--verbose", help="Prints important debugging messages on screen.",
+                            action="store_true")
+        logger = "False"
         args = parser.parse_args()
+
+        if args.verbose:
+            logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG)
+            logging.debug('You have successfully set the Debugging On.')
+            logging.debug("Arguments Provided : %s" % (args))
+            logging.debug(
+                "Operating System : %s - %s - %s" % (platform.system(), platform.release(), platform.version()))
+            logging.debug("Python Version : %s (%s)" % (platform.python_version(), platform.architecture()[0]))
+            logger = "True"
 
         if args.version:
             print("Current Version : %s" % __version__)
@@ -53,4 +66,4 @@ class main(object):
             if type(args.language) == list:
                 args.language = args.language[0]
 
-            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language, skipper=skipper)
+            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language, skipper=skipper, logger = logger)

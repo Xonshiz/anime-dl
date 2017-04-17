@@ -13,7 +13,7 @@ from sys import exit
 
 class AnimeDL(object):
 
-    def __init__(self, url, username, password, resolution, language, skipper):
+    def __init__(self, url, username, password, resolution, language, skipper, logger):
 
         website = str(self.honcho(url=url[0]))
 
@@ -24,7 +24,7 @@ class AnimeDL(object):
             else:
 
                 sites.crunchyroll.CrunchyRoll(
-                    url=url[0], password=password, username=username, resolution=resolution, language=language, skipper=skipper)
+                    url=url[0], password=password, username=username, resolution=resolution, language=language, skipper=skipper, logger = logger)
 
     def honcho(self, url):
         # print("Got url : %s" % url)

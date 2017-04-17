@@ -31,11 +31,13 @@ Anime-dl is a Command-line program to download anime from CrunchyRoll and Funima
 You can check the list of supported websites [**`HERE`**](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
 
 ## Dependencies Installation
-This script can run on multiple Operating Systems. But, the script depends on some external binaries or libs. We need `FFmpeg` and `Node.js` in our paths.
+This script can run on multiple Operating Systems. But, the script depends on some external binaries or libs. We need `FFmpeg` and `Node.js` in our paths. There are some old streams on Crunchyroll which only support `rtmpe` streams, as noted from Issue #9. For this, you need `rtmpdump`.
+
+**`These dependencies are required on ALL the operating systems, ALL!.`**
 
 1.) Make sure you have Python installed and is present in your system's path.
 
-2.) Grab [FFmpeg from this link](https://ffmpeg.org/download.html) and [Node.js from this link](https://nodejs.org/en/download/).
+2.) Grab [FFmpeg from this link](https://ffmpeg.org/download.html), [Node.js from this link](https://nodejs.org/en/download/) and [RTMPDump](https://www.videohelp.com/software/RTMPDump).
 
 3.) Install FFmpeg and Node.js and place it in the directory of this script, or put them in your system's path.
 
@@ -83,6 +85,7 @@ Currently, the script supports these arguments :
 -p,--password                          Indicates password for a website. [REQUIRED]
 -r,--resolution                        Indicates the desired resolution. (default = 720p)
 --skip                                 Skip video downloads (Will only download subtitles)
+-v,--verbose                           Starts Verbose Logging for detailed information.
 -l,--language                          Selects the language for the show. (default = Japanese) [Langs = english, dub, sub, Japanese, eng]
 ```
 
@@ -130,6 +133,7 @@ This is a very basic and small sript, so at the moment it only have a few featur
 * Skip if the file has already been downloaded.
 * Downloads all the episodes for a show available on Crunchyroll.
 * Gives choice for downloading subs or dubs of a series available on Crunchyroll.
+* Choice to download only the subs and skip the videos.
 
 ## Changelog
 You can check the changelog [**`HERE`**](https://github.com/Xonshiz/anime-dl/blob/master/Changelog.md).
@@ -138,13 +142,17 @@ You can check the changelog [**`HERE`**](https://github.com/Xonshiz/anime-dl/blo
 If your're planning to open an issue for the script or ask for a new feature or anything that requires opening an Issue, then please do keep these things in mind.
 
 ### Reporting Issues
-PLEASE RUN THIS SCRIPT IN A COMMAND LINE (as mentioned in the Usage section) AND DON'T SAY THAT `THE SCRIPT CLOSED TOO QUICK, I COULDN'T SEE`.
+PLEASE RUN THIS SCRIPT IN A COMMAND LINE (as mentioned in the Usage section) AND DON'T SAY THAT `THE SCRIPT CLOSED TOO QUICK, I COULDN'T SEE`. If something doesn't work like it's supposed to, run the command with the `--verbose` argument. It'll create a `Error Log.txt` file in the same directory. Upload the content of that file on Github Gists/Pastebin etc. and share that link.
+
+**Please make sure that you remove your loggin credentials from the Error Log.txt file before you post its contents anywhere.**
 
 If you're here to report an issue, please follow the basic syntax to post a request :
 
 **Subject** : Error That You Get.
 
 **Command Line Arguments You Gave** : The whole command that you gave to execute/run this script.
+
+**Verbose Log Link** : Link to the Gist/Pastebin that holds the content of Error Log.txt.
 
 **Long Explanation** : Describe in details what you saw, what should've happened and what actually happened.
 

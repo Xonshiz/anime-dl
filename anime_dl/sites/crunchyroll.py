@@ -18,10 +18,13 @@ from os import path, makedirs
 from glob import glob
 from shutil import move
 from sys import exit
+import logging
 
 
 class CrunchyRoll(object):
-    def __init__(self, url, password, username, resolution, language, skipper):
+    def __init__(self, url, password, username, resolution, language, skipper, logger):
+        if logger == "True":
+            logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG)
 
         Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
         Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
@@ -31,6 +34,7 @@ class CrunchyRoll(object):
 
         if Crunchy_Video:
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
+            logging.debug("Cookies : %s\nToken : %s" % (cookies, Token))
             if skipper == "yes":
                 self.onlySubs(url=url, cookies=cookies)
             else:
@@ -39,6 +43,7 @@ class CrunchyRoll(object):
         elif Crunchy_Show:
 
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
+            logging.debug("Cookies : %s\nToken : %s" % (cookies, Token))
             self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution, skipper=skipper)
 
     def loginCheck(self, htmlsource):
@@ -66,9 +71,12 @@ class CrunchyRoll(object):
         print("Trying to login...")
         initialPagefetch = sess.get(
             url='https://www.crunchyroll.com/login', headers=headers).text
+        logging.debug("initialPageFetch %s" % initialPagefetch)
         initialCookies = sess.cookies
+        logging.debug("initialCokies %s" % initialCookies)
         csrfToken = search(r'login_form\[\_token\]\"\ value\=\"(.*?)\"',
                            str(initialPagefetch)).group(1)
+        logging.debug("csrfToken : %s" % csrfToken)
         # print(csrfToken)
 
         payload = {
@@ -95,10 +103,28 @@ class CrunchyRoll(object):
         else:
             print("Unable to Log you in. Check credentials again.")
 
+    def rtmpDump(self, host, file, url, filename):
+        # print("Downloading RTMP DUMP STREAM!")
+        logging.debug("Host : %s", host)
+        logging.debug("file : %s", file)
+        logging.debug("url : %s", url)
+        serverAddress = str(host.split("/ondemand/")[0]) + "/ondemand/"
+        authentication = "ondemand/" + str(host.split("/ondemand/")[1])
+
+        rtmpDumpCommand = "rtmpdump -r \"%s\" -a \"%s\" -f \"WIN 25,0,0,148\" -W \"http://www.crunchyroll.com/vendor/ChromelessPlayerApp-c0d121b.swf\" -p \"%s\" -y \"%s\" -o \"%s\"" % (serverAddress, authentication, url, file, filename)
+        logging.debug("rtmpDumpCommand : %s" % rtmpDumpCommand)
+
+        try:
+            call(rtmpDumpCommand)
+        except Exception:
+            print("Please make sure that rtmpdump is present in the PATH or THIS DIRECTORY!")
+            exit()
+
     def singleEpisode(self, url, cookies, token, resolution):
         # print("Inside single episode")
         current_directory = getcwd()
         video_id = str(url.split('-')[-1]).replace("/", "")
+        logging.debug("video_id : %s" % video_id)
         # print("URL : %s\nCookies : %s\nToken : %s\nResolution : %s\nMedia ID : %s" % (url, cookies, token, resolution, video_id))
         headers = {
             'User-Agent':
@@ -113,37 +139,61 @@ class CrunchyRoll(object):
         sess = create_scraper(sess)
 
         if str(resolution).lower() in ['1080p', '1080', 'best', 'fhd']:
+            logging.debug("Downloading Resolution : %s" % resolution)
             print("Grabbing Links for 1080p Streams.")
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
                 video_id, url)
+            logging.debug("infoURL : %s" % infoURL)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
+            logging.debug("xml_page : %s" % xml_page)
 
-            m3u8_link_raw = str(
-                search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                    1)).strip().replace("&amp;", "&")
+            try:
+                m3u8_link_raw = str(
+                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
+                        1)).strip().replace("&amp;", "&")
+                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
+                if "mp4:" in m3u8_link_raw:
+                    rtmpDL = "True"
+                    hostLink = str(
+                        search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
+                            1)).strip().replace("&amp;", "&")
+
+            except Exception:
+                print("Error Found")
+                exit()
+
             anime_name = str(
                 search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                .group(1)).strip().replace("â", "'").replace(
-                    ":", " - ").replace("&#039;", "'")
+                    .group(1)).strip().replace("â", "'").replace(
+                ":", " - ").replace("&#039;", "'")
+            logging.debug("anime_name : %s" % anime_name)
+
             episode_number = str(
                 search(r'\<episode_number\>(.*?)\<\/episode_number\>',
                        xml_page).group(1)).strip()
+            logging.debug("episode_number : %s" % episode_number)
+
             width = str(
                 search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
                     1)).strip()
+            logging.debug("width : %s" % width)
+
             height = str(
                 search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
                     1)).strip()
+            logging.debug("height : %s" % height)
+
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
             file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
-            # print("File Name : %s\n" % file_name)
+            logging.debug("file_name : %s" % file_name)
 
+            # print("File Name : %s\n" % file_name)
             try:
                 MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                #print(MAX_PATH)
+                # print(MAX_PATH)
             except (Exception):
                 MAX_PATH = 4096
 
@@ -154,7 +204,7 @@ class CrunchyRoll(object):
                 makedirs("Output")
 
             if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping ', file_name, '\n')
+                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
                 pass
             else:
                 self.subFetcher(
@@ -162,13 +212,17 @@ class CrunchyRoll(object):
                     anime_name=anime_name,
                     episode_number=episode_number)
                 # UNCOMMENT THIS LINE!!!
-                m3u8_file = sess.get(
-                    url=m3u8_link_raw, cookies=cookies,
-                    headers=headers).text.splitlines()[2]
-                # print("M3u8 : %s" % m3u8_file)
-                ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                    m3u8_file, file_name)
-                call(ffmpeg_command)
+                if rtmpDL == "True":
+                    self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
+                else:
+                    m3u8_file = sess.get(
+                        url=m3u8_link_raw, cookies=cookies,
+                        headers=headers).text.splitlines()[2]
+                    # print("M3u8 : %s" % m3u8_file)
+                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
+                        m3u8_file, file_name)
+                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
+                    call(ffmpeg_command)
 
                 for video_file in glob("*.mp4"):
                     try:
@@ -189,27 +243,50 @@ class CrunchyRoll(object):
                 video_id, url)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
+            logging.debug("xml_page : %s" % xml_page)
 
-            m3u8_link_raw = str(
-                search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                    1)).strip().replace("&amp;", "&")
+            try:
+                m3u8_link_raw = str(
+                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
+                        1)).strip().replace("&amp;", "&")
+                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
+                if "mp4:" in m3u8_link_raw:
+                    rtmpDL = "True"
+                    hostLink = str(
+                    search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
+                        1)).strip().replace("&amp;", "&")
+
+            except Exception:
+                print("Error Found")
+                exit()
+
             anime_name = str(
                 search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
                 .group(1)).strip().replace("â", "'").replace(
                     ":", " - ").replace("&#039;", "'")
+            logging.debug("anime_name : %s" % anime_name)
+
             episode_number = str(
                 search(r'\<episode_number\>(.*?)\<\/episode_number\>',
                        xml_page).group(1)).strip()
+            logging.debug("episode_number : %s" % episode_number)
+
             width = str(
                 search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
                     1)).strip()
+            logging.debug("width : %s" % width)
+
             height = str(
                 search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
                     1)).strip()
+            logging.debug("height : %s" % height)
+
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
             file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
+            logging.debug("file_name : %s" % file_name)
+
             # print("File Name : %s\n" % file_name)
             try:
                 MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
@@ -232,13 +309,17 @@ class CrunchyRoll(object):
                     anime_name=anime_name,
                     episode_number=episode_number)
                 # UNCOMMENT THIS LINE!!!
-                m3u8_file = sess.get(
-                    url=m3u8_link_raw, cookies=cookies,
-                    headers=headers).text.splitlines()[2]
-                # print("M3u8 : %s" % m3u8_file)
-                ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                    m3u8_file, file_name)
-                call(ffmpeg_command)
+                if rtmpDL == "True":
+                    self.rtmpDump(host = hostLink, file = m3u8_link_raw, url = url, filename = file_name)
+                else:
+                    m3u8_file = sess.get(
+                        url=m3u8_link_raw, cookies=cookies,
+                        headers=headers).text.splitlines()[2]
+                    # print("M3u8 : %s" % m3u8_file)
+                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
+                        m3u8_file, file_name)
+                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
+                    call(ffmpeg_command)
 
                 for video_file in glob("*.mp4"):
                     try:
@@ -259,32 +340,54 @@ class CrunchyRoll(object):
                 video_id, url)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
+            logging.debug("xml_page : %s" % xml_page)
 
-            m3u8_link_raw = str(
-                search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                    1)).strip().replace("&amp;", "&")
+            try:
+                m3u8_link_raw = str(
+                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
+                        1)).strip().replace("&amp;", "&")
+                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
+                if "mp4:" in m3u8_link_raw:
+                    rtmpDL = "True"
+                    hostLink = str(
+                        search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
+                            1)).strip().replace("&amp;", "&")
+
+            except Exception:
+                print("Error Found")
+                exit()
+
             anime_name = str(
                 search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                .group(1)).strip().replace("â", "'").replace(
-                    ":", " - ").replace("&#039;", "'")
+                    .group(1)).strip().replace("â", "'").replace(
+                ":", " - ").replace("&#039;", "'")
+            logging.debug("anime_name : %s" % anime_name)
+
             episode_number = str(
                 search(r'\<episode_number\>(.*?)\<\/episode_number\>',
                        xml_page).group(1)).strip()
+            logging.debug("episode_number : %s" % episode_number)
+
             width = str(
                 search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
                     1)).strip()
+            logging.debug("width : %s" % width)
+
             height = str(
                 search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
                     1)).strip()
+            logging.debug("height : %s" % height)
+
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
             file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
-            # print("File Name : %s\n" % file_name)
+            logging.debug("file_name : %s" % file_name)
 
+            # print("File Name : %s\n" % file_name)
             try:
                 MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                #print(MAX_PATH)
+                # print(MAX_PATH)
             except (Exception):
                 MAX_PATH = 4096
 
@@ -295,7 +398,7 @@ class CrunchyRoll(object):
                 makedirs("Output")
 
             if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping ', file_name, '\n')
+                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
                 pass
             else:
                 self.subFetcher(
@@ -303,13 +406,17 @@ class CrunchyRoll(object):
                     anime_name=anime_name,
                     episode_number=episode_number)
                 # UNCOMMENT THIS LINE!!!
-                m3u8_file = sess.get(
-                    url=m3u8_link_raw, cookies=cookies,
-                    headers=headers).text.splitlines()[2]
-                # print("M3u8 : %s" % m3u8_file)
-                ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                    m3u8_file, file_name)
-                call(ffmpeg_command)
+                if rtmpDL == "True":
+                    self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
+                else:
+                    m3u8_file = sess.get(
+                        url=m3u8_link_raw, cookies=cookies,
+                        headers=headers).text.splitlines()[2]
+                    # print("M3u8 : %s" % m3u8_file)
+                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
+                        m3u8_file, file_name)
+                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
+                    call(ffmpeg_command)
 
                 for video_file in glob("*.mp4"):
                     try:
@@ -330,32 +437,54 @@ class CrunchyRoll(object):
                 video_id, url)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
+            logging.debug("xml_page : %s" % xml_page)
 
-            m3u8_link_raw = str(
-                search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                    1)).strip().replace("&amp;", "&")
+            try:
+                m3u8_link_raw = str(
+                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
+                        1)).strip().replace("&amp;", "&")
+                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
+                if "mp4:" in m3u8_link_raw:
+                    rtmpDL = "True"
+                    hostLink = str(
+                        search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
+                            1)).strip().replace("&amp;", "&")
+
+            except Exception:
+                print("Error Found")
+                exit()
+
             anime_name = str(
                 search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                .group(1)).strip().replace("â", "'").replace(
-                    ":", " - ").replace("&#039;", "'")
+                    .group(1)).strip().replace("â", "'").replace(
+                ":", " - ").replace("&#039;", "'")
+            logging.debug("anime_name : %s" % anime_name)
+
             episode_number = str(
                 search(r'\<episode_number\>(.*?)\<\/episode_number\>',
                        xml_page).group(1)).strip()
+            logging.debug("episode_number : %s" % episode_number)
+
             width = str(
                 search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
                     1)).strip()
+            logging.debug("width : %s" % width)
+
             height = str(
                 search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
                     1)).strip()
+            logging.debug("height : %s" % height)
+
             # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
             # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
             file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + " [%sx%s].mp4" % (width, height)
-            # print("File Name : %s\n" % file_name)
+            logging.debug("file_name : %s" % file_name)
 
+            # print("File Name : %s\n" % file_name)
             try:
                 MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                #print(MAX_PATH)
+                # print(MAX_PATH)
             except (Exception):
                 MAX_PATH = 4096
 
@@ -366,7 +495,7 @@ class CrunchyRoll(object):
                 makedirs("Output")
 
             if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping ', file_name, '\n')
+                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
                 pass
             else:
                 self.subFetcher(
@@ -374,13 +503,17 @@ class CrunchyRoll(object):
                     anime_name=anime_name,
                     episode_number=episode_number)
                 # UNCOMMENT THIS LINE!!!
-                m3u8_file = sess.get(
-                    url=m3u8_link_raw, cookies=cookies,
-                    headers=headers).text.splitlines()[2]
-                # print("M3u8 : %s" % m3u8_file)
-                ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                    m3u8_file, file_name)
-                call(ffmpeg_command)
+                if rtmpDL == "True":
+                    self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
+                else:
+                    m3u8_file = sess.get(
+                        url=m3u8_link_raw, cookies=cookies,
+                        headers=headers).text.splitlines()[2]
+                    # print("M3u8 : %s" % m3u8_file)
+                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
+                        m3u8_file, file_name)
+                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
+                    call(ffmpeg_command)
 
                 for video_file in glob("*.mp4"):
                     try:
@@ -472,6 +605,7 @@ class CrunchyRoll(object):
                 r'subtitle_script_id\=(.*?)\'\ title\=\'\[(.*?)\]\ (.*?)\'',
                 str(xml)):
             # print("Sub ID : %s\t| Sub Lang : %s" % (sub_id, sub_lang))
+            logging.debug("sub_id : %s\nsub_lang : %s\nsub_lang2 : %s" % (sub_id, sub_lang, sub_lang2))
             xml_return = str(
                 sess.get(
                     url="http://www.crunchyroll.com/xml/?req=RpcApiSubtitle_GetXml&subtitle_script_id=%s"
@@ -480,9 +614,11 @@ class CrunchyRoll(object):
             # print(xml_return)
             iv = str(
                 search(r'\<iv\>(.*?)\<\/iv\>', xml_return).group(1)).strip()
+            logging.debug("iv : %s" % iv)
             data = str(
                 search(r'\<data\>(.*?)\<\/data\>', xml_return).group(
                     1)).strip()
+            logging.debug("data : %s" % data)
             # print("Sub ID : %s\t| iv : %s\t| data : %s" % (sub_id, iv, data))
             subtitle = self._decrypt_subtitles(data, iv,
                                                sub_id).decode('utf-8')
@@ -493,6 +629,7 @@ class CrunchyRoll(object):
             lang_code = str(
                 search(r'lang_code\=\"(.*?)\"', str(subtitle)).group(
                     1)).strip()
+            logging.debug("lang_code : %s" % lang_code)
             sub_file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
                 episode_number) + ".%s.ass" % lang_code
 
