@@ -10,3 +10,4 @@
 - Fix for [6](https://github.com/Xonshiz/anime-dl/issues/6) and Fix for [3](https://github.com/Xonshiz/anime-dl/issues/3) [2017.04.13]
 - Fix for #9 [2017.04.13]
 - Added `Verbose Logging` [2017.04.13]
+- Fix for #11 [2017.04.21]

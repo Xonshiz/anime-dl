@@ -20,11 +20,16 @@ from shutil import move
 from sys import exit
 import logging
 
+'''This code Stinx. I'll write a better, faster and compact code when I get time after my exams or in mid.
+I literally have NO idea what I was thinking when I wrote this piece of code.
+THIS REALLY STINX! Read the code at your own risk.
+'''
+
 
 class CrunchyRoll(object):
     def __init__(self, url, password, username, resolution, language, skipper, logger):
         if logger == "True":
-            logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG)
+            logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG, encoding="utf-8")
 
         Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
         Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
@@ -139,6 +144,7 @@ class CrunchyRoll(object):
         sess = create_scraper(sess)
 
         if str(resolution).lower() in ['1080p', '1080', 'best', 'fhd']:
+            rtmpDL = "false" # Fix for #11
             logging.debug("Downloading Resolution : %s" % resolution)
             print("Grabbing Links for 1080p Streams.")
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
@@ -146,7 +152,7 @@ class CrunchyRoll(object):
             logging.debug("infoURL : %s" % infoURL)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
-            logging.debug("xml_page : %s" % xml_page)
+            # logging.debug("xml_page : %s" % xml_page)
 
             try:
                 m3u8_link_raw = str(
@@ -238,12 +244,13 @@ class CrunchyRoll(object):
                         pass
 
         if str(resolution).lower() in ['720p', '720', 'hd']:
+            rtmpDL = "false" # Fix for #11
             print("Grabbing Links for 720p Streams.")
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=62&current_page=%s" % (
                 video_id, url)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
-            logging.debug("xml_page : %s" % xml_page)
+            # logging.debug("xml_page : %s" % xml_page)
 
             try:
                 m3u8_link_raw = str(
@@ -335,12 +342,13 @@ class CrunchyRoll(object):
                         pass
 
         if str(resolution).lower() in ['480p', '480', 'sd']:
+            rtmpDL = "false" # Fix for #11.
             print("Grabbing Links for 480p Streams.")
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
                 video_id, url)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
-            logging.debug("xml_page : %s" % xml_page)
+            # logging.debug("xml_page : %s" % xml_page)
 
             try:
                 m3u8_link_raw = str(
@@ -432,12 +440,13 @@ class CrunchyRoll(object):
                         pass
 
         if str(resolution).lower() in ['360p', '360', 'mobile']:
+            rtmpDL = "false" # Fix for #11
             print("Grabbing Links for 360p Streams.")
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
                 video_id, url)
             xml_page = sess.get(
                 url=infoURL, headers=headers, cookies=cookies).text
-            logging.debug("xml_page : %s" % xml_page)
+            # logging.debug("xml_page : %s" % xml_page)
 
             try:
                 m3u8_link_raw = str(
