@@ -11,3 +11,5 @@
 - Fix for #9 [2017.04.13]
 - Added `Verbose Logging` [2017.04.13]
 - Fix for #11 [2017.04.21]
+- Re-write code to remove unnecessary parts [2017.05.30]
+- Fix for #12 [2017.05.30]

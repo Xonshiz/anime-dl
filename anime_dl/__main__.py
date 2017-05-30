@@ -10,6 +10,7 @@ from AnimeDL import *
 # from anime_dl import AnimeDL
 from sys import exit
 from version import __version__
+from anime_dl import animeName
 import argparse
 import logging
 import platform

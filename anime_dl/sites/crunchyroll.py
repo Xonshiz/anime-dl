@@ -19,6 +19,7 @@ from glob import glob
 from shutil import move
 from sys import exit
 import logging
+from anime_dl import animeName
 
 '''This code Stinx. I'll write a better, faster and compact code when I get time after my exams or in mid.
 I literally have NO idea what I was thinking when I wrote this piece of code.
@@ -143,404 +144,104 @@ class CrunchyRoll(object):
         sess = session()
         sess = create_scraper(sess)
 
-        if str(resolution).lower() in ['1080p', '1080', 'best', 'fhd']:
-            rtmpDL = "false" # Fix for #11
-            logging.debug("Downloading Resolution : %s" % resolution)
-            print("Grabbing Links for 1080p Streams.")
-            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
-                video_id, url)
-            logging.debug("infoURL : %s" % infoURL)
-            xml_page = sess.get(
-                url=infoURL, headers=headers, cookies=cookies).text
-            # logging.debug("xml_page : %s" % xml_page)
+        rtmpDL = "false" # Fix for #11
+        logging.debug("Downloading Resolution : %s" % resolution)
 
-            try:
-                m3u8_link_raw = str(
-                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                        1)).strip().replace("&amp;", "&")
-                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
-                if "mp4:" in m3u8_link_raw:
-                    rtmpDL = "True"
-                    hostLink = str(
-                        search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
-                            1)).strip().replace("&amp;", "&")
+        if str(resolution).lower() in ['1080p', '1080', 'fhd', 'best']:
+            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (video_id, url)
 
-            except Exception:
-                print("Error Found")
-                exit()
+        elif str(resolution).lower() in ['720p', '720', 'hd']:
+            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=62&current_page=%s" % (video_id, url)
 
-            anime_name = str(
-                search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                    .group(1)).strip().replace("â", "'").replace(
-                ":", " - ").replace("&#039;", "'")
-            logging.debug("anime_name : %s" % anime_name)
-
-            episode_number = str(
-                search(r'\<episode_number\>(.*?)\<\/episode_number\>',
-                       xml_page).group(1)).strip()
-            logging.debug("episode_number : %s" % episode_number)
-
-            width = str(
-                search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
-                    1)).strip()
-            logging.debug("width : %s" % width)
-
-            height = str(
-                search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
-                    1)).strip()
-            logging.debug("height : %s" % height)
-
-            # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
-            # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
-                episode_number) + " [%sx%s].mp4" % (width, height)
-            logging.debug("file_name : %s" % file_name)
-
-            # print("File Name : %s\n" % file_name)
-            try:
-                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                # print(MAX_PATH)
-            except (Exception):
-                MAX_PATH = 4096
-
-            if len(file_name) > MAX_PATH:
-                file_name = file_name[:MAX_PATH]
-
-            if not path.exists("Output"):
-                makedirs("Output")
-
-            if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
-                pass
-            else:
-                self.subFetcher(
-                    xml=str(xml_page),
-                    anime_name=anime_name,
-                    episode_number=episode_number)
-                # UNCOMMENT THIS LINE!!!
-                if rtmpDL == "True":
-                    self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
-                else:
-                    m3u8_file = sess.get(
-                        url=m3u8_link_raw, cookies=cookies,
-                        headers=headers).text.splitlines()[2]
-                    # print("M3u8 : %s" % m3u8_file)
-                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                        m3u8_file, file_name)
-                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
-                    call(ffmpeg_command)
-
-                for video_file in glob("*.mp4"):
-                    try:
-                        move(video_file, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-                for sub_files in glob("*.ass"):
-                    try:
-                        move(sub_files, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-
-        if str(resolution).lower() in ['720p', '720', 'hd']:
-            rtmpDL = "false" # Fix for #11
-            print("Grabbing Links for 720p Streams.")
-            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=62&current_page=%s" % (
-                video_id, url)
-            xml_page = sess.get(
-                url=infoURL, headers=headers, cookies=cookies).text
-            # logging.debug("xml_page : %s" % xml_page)
-
-            try:
-                m3u8_link_raw = str(
-                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                        1)).strip().replace("&amp;", "&")
-                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
-                if "mp4:" in m3u8_link_raw:
-                    rtmpDL = "True"
-                    hostLink = str(
-                    search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
-                        1)).strip().replace("&amp;", "&")
-
-            except Exception:
-                print("Error Found")
-                exit()
-
-            anime_name = str(
-                search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                .group(1)).strip().replace("â", "'").replace(
-                    ":", " - ").replace("&#039;", "'")
-            logging.debug("anime_name : %s" % anime_name)
-
-            episode_number = str(
-                search(r'\<episode_number\>(.*?)\<\/episode_number\>',
-                       xml_page).group(1)).strip()
-            logging.debug("episode_number : %s" % episode_number)
-
-            width = str(
-                search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
-                    1)).strip()
-            logging.debug("width : %s" % width)
-
-            height = str(
-                search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
-                    1)).strip()
-            logging.debug("height : %s" % height)
-
-            # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
-            # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
-                episode_number) + " [%sx%s].mp4" % (width, height)
-            logging.debug("file_name : %s" % file_name)
-
-            # print("File Name : %s\n" % file_name)
-            try:
-                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                #print(MAX_PATH)
-            except (Exception):
-                MAX_PATH = 4096
-
-            if len(file_name) > MAX_PATH:
-                file_name = file_name[:MAX_PATH]
-
-            if not path.exists("Output"):
-                makedirs("Output")
-
-            if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
-                pass
-            else:
-                self.subFetcher(
-                    xml=str(xml_page),
-                    anime_name=anime_name,
-                    episode_number=episode_number)
-                # UNCOMMENT THIS LINE!!!
-                if rtmpDL == "True":
-                    self.rtmpDump(host = hostLink, file = m3u8_link_raw, url = url, filename = file_name)
-                else:
-                    m3u8_file = sess.get(
-                        url=m3u8_link_raw, cookies=cookies,
-                        headers=headers).text.splitlines()[2]
-                    # print("M3u8 : %s" % m3u8_file)
-                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                        m3u8_file, file_name)
-                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
-                    call(ffmpeg_command)
-
-                for video_file in glob("*.mp4"):
-                    try:
-                        move(video_file, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-                for sub_files in glob("*.ass"):
-                    try:
-                        move(sub_files, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-
-        if str(resolution).lower() in ['480p', '480', 'sd']:
-            rtmpDL = "false" # Fix for #11.
-            print("Grabbing Links for 480p Streams.")
+        elif str(resolution).lower() in ['480p', '480', 'sd']:
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
-                video_id, url)
-            xml_page = sess.get(
-                url=infoURL, headers=headers, cookies=cookies).text
-            # logging.debug("xml_page : %s" % xml_page)
-
-            try:
-                m3u8_link_raw = str(
-                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                        1)).strip().replace("&amp;", "&")
-                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
-                if "mp4:" in m3u8_link_raw:
-                    rtmpDL = "True"
-                    hostLink = str(
-                        search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
-                            1)).strip().replace("&amp;", "&")
-
-            except Exception:
-                print("Error Found")
-                exit()
-
-            anime_name = str(
-                search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                    .group(1)).strip().replace("â", "'").replace(
-                ":", " - ").replace("&#039;", "'")
-            logging.debug("anime_name : %s" % anime_name)
-
-            episode_number = str(
-                search(r'\<episode_number\>(.*?)\<\/episode_number\>',
-                       xml_page).group(1)).strip()
-            logging.debug("episode_number : %s" % episode_number)
-
-            width = str(
-                search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
-                    1)).strip()
-            logging.debug("width : %s" % width)
-
-            height = str(
-                search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
-                    1)).strip()
-            logging.debug("height : %s" % height)
-
-            # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
-            # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
-                episode_number) + " [%sx%s].mp4" % (width, height)
-            logging.debug("file_name : %s" % file_name)
-
-            # print("File Name : %s\n" % file_name)
-            try:
-                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                # print(MAX_PATH)
-            except (Exception):
-                MAX_PATH = 4096
-
-            if len(file_name) > MAX_PATH:
-                file_name = file_name[:MAX_PATH]
-
-            if not path.exists("Output"):
-                makedirs("Output")
-
-            if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
-                pass
-            else:
-                self.subFetcher(
-                    xml=str(xml_page),
-                    anime_name=anime_name,
-                    episode_number=episode_number)
-                # UNCOMMENT THIS LINE!!!
-                if rtmpDL == "True":
-                    self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
-                else:
-                    m3u8_file = sess.get(
-                        url=m3u8_link_raw, cookies=cookies,
-                        headers=headers).text.splitlines()[2]
-                    # print("M3u8 : %s" % m3u8_file)
-                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                        m3u8_file, file_name)
-                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
-                    call(ffmpeg_command)
-
-                for video_file in glob("*.mp4"):
-                    try:
-                        move(video_file, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-                for sub_files in glob("*.ass"):
-                    try:
-                        move(sub_files, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-
-        if str(resolution).lower() in ['360p', '360', 'mobile']:
-            rtmpDL = "false" # Fix for #11
-            print("Grabbing Links for 360p Streams.")
+            video_id, url)
+        elif str(resolution).lower() in ['360p', '360', 'cancer']:
             infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
-                video_id, url)
-            xml_page = sess.get(
-                url=infoURL, headers=headers, cookies=cookies).text
-            # logging.debug("xml_page : %s" % xml_page)
+            video_id, url)
 
-            try:
-                m3u8_link_raw = str(
-                    search(r'\<file\>(.*?)\<\/file\>', xml_page).group(
-                        1)).strip().replace("&amp;", "&")
-                logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
-                if "mp4:" in m3u8_link_raw:
-                    rtmpDL = "True"
-                    hostLink = str(
-                        search(r'\<host\>(.*?)\<\/host\>', xml_page).group(
-                            1)).strip().replace("&amp;", "&")
+        logging.debug("infoURL : %s" % infoURL)
+        # print(infoURL)
 
-            except Exception:
-                print("Error Found")
-                exit()
+        xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text
+        logging.debug("xml_page : %s" % xml_page.encode("utf-8"))
 
-            anime_name = str(
+        try:
+            m3u8_link_raw = str(search(r'\<file\>(.*?)\<\/file\>', xml_page).group(1)).strip().replace("&amp;", "&")
+            logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
+
+            if "mp4:" in m3u8_link_raw:
+                rtmpDL = "True"
+                hostLink = str(search(r'\<host\>(.*?)\<\/host\>', xml_page).group(1)).strip().replace("&amp;", "&")
+
+        except Exception:
+            print("Error Found")
+            exit()
+        anime_name = str(
                 search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
                     .group(1)).strip().replace("â", "'").replace(
                 ":", " - ").replace("&#039;", "'")
-            logging.debug("anime_name : %s" % anime_name)
+        logging.debug("anime_name : %s" % anime_name)
 
-            episode_number = str(
+        episode_number = str(
                 search(r'\<episode_number\>(.*?)\<\/episode_number\>',
                        xml_page).group(1)).strip()
-            logging.debug("episode_number : %s" % episode_number)
+        logging.debug("episode_number : %s" % episode_number)
 
-            width = str(
+        width = str(
                 search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
                     1)).strip()
-            logging.debug("width : %s" % width)
+        logging.debug("width : %s" % width)
 
-            height = str(
+        height = str(
                 search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
                     1)).strip()
-            logging.debug("height : %s" % height)
+        logging.debug("height : %s" % height)
 
-            # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
-            # self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
-            file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
-                episode_number) + " [%sx%s].mp4" % (width, height)
-            logging.debug("file_name : %s" % file_name)
+        reso = str(width).strip() + "X" + str(height).strip()
 
-            # print("File Name : %s\n" % file_name)
-            try:
-                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                # print(MAX_PATH)
-            except (Exception):
-                MAX_PATH = 4096
+        file_name = animeName.animeName().nameEdit(animeName = anime_name, episodeNumber = episode_number, resolution = reso)
+        # print(file_name)
 
-            if len(file_name) > MAX_PATH:
-                file_name = file_name[:MAX_PATH]
+        logging.debug("file_name : %s" % file_name)
 
-            if not path.exists("Output"):
-                makedirs("Output")
+        if not path.exists("Output"):
+            makedirs("Output")
 
-            if path.isfile("Output/" + file_name):
-                print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
-                pass
-            else:
-                self.subFetcher(
+        if path.isfile("Output/" + file_name):
+            print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
+            pass
+        else:
+            self.subFetcher(
                     xml=str(xml_page),
                     anime_name=anime_name,
                     episode_number=episode_number)
-                # UNCOMMENT THIS LINE!!!
-                if rtmpDL == "True":
-                    self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
-                else:
-                    m3u8_file = sess.get(
+            # UNCOMMENT THIS LINE!!!
+            if rtmpDL == "True":
+                self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
+            else:
+                m3u8_file = sess.get(
                         url=m3u8_link_raw, cookies=cookies,
                         headers=headers).text.splitlines()[2]
-                    # print("M3u8 : %s" % m3u8_file)
-                    ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
+                # print("M3u8 : %s" % m3u8_file)
+                ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
                         m3u8_file, file_name)
-                    logging.debug("ffmpeg_command : %s" % ffmpeg_command)
-                    call(ffmpeg_command)
+                logging.debug("ffmpeg_command : %s" % ffmpeg_command)
+                call(ffmpeg_command)
 
-                for video_file in glob("*.mp4"):
-                    try:
-                        move(video_file, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-                for sub_files in glob("*.ass"):
-                    try:
-                        move(sub_files, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
+            for video_file in glob("*.mp4"):
+                try:
+                    move(video_file, "Output")
+                except Exception as e:
+                    print(str(e))
+                    pass
+            for sub_files in glob("*.ass"):
+                try:
+                    move(sub_files, "Output")
+                except Exception as e:
+                    print(str(e))
+                    pass
 
-        print("Completed Downloading : %s" % anime_name)
-
-        return (video_id, m3u8_link_raw, anime_name, episode_number, width,
-                height, file_name, cookies, token)
 
     def wholeShow(self, url, cookie, token, language, resolution, skipper):
     	# print("Check my patreon for this : http://patreon.com/Xonshiz")
