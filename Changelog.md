@@ -13,3 +13,5 @@
 - Fix for #11 [2017.04.21]
 - Re-wrote code to remove unnecessary parts [2017.05.30]
 - Fix for #12 [2017.05.30]
+- Site support for Funimation.com [2017.05.30]
+- Fix for #8 [2017.05.30]
