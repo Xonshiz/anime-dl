@@ -33,6 +33,9 @@ You can check the list of supported websites [**`HERE`**](https://github.com/Xon
 ## Dependencies Installation
 This script can run on multiple Operating Systems. But, the script depends on some external binaries or libs. We need `FFmpeg` and `Node.js` in our paths. There are some old streams on Crunchyroll which only support `rtmpe` streams, as noted from Issue #9. For this, you need `rtmpdump`.
 
+You also need [mkvmerge.exe](https://mkvtoolnix.download/downloads.html) in your `PATH` or `Working Directory`.
+
+
 **`These dependencies are required on ALL the operating systems, ALL!.`**
 
 1.) Make sure you have Python installed and is present in your system's path.

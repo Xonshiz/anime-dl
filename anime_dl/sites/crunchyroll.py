@@ -4,7 +4,7 @@
 from cfscrape import create_scraper
 from requests import session
 from re import search, findall, match, sub
-from os import getcwd
+from os import getcwd, name, remove
 from subprocess import call, check_output
 # External libs have been taken from youtube-dl for decoding the subtitles.
 from external.utils import bytes_to_intlist, intlist_to_bytes
@@ -229,18 +229,76 @@ class CrunchyRoll(object):
                 logging.debug("ffmpeg_command : %s" % ffmpeg_command)
                 call(ffmpeg_command)
 
-            for video_file in glob("*.mp4"):
-                try:
-                    move(video_file, "Output")
-                except Exception as e:
-                    print(str(e))
-                    pass
-            for sub_files in glob("*.ass"):
-                try:
-                    move(sub_files, "Output")
-                except Exception as e:
-                    print(str(e))
-                    pass
+            subtitles_files = []
+            for sub_file in glob("*.ass"):
+                if sub_file.endswith(".enUS.ass"):
+                    subtitles_files.insert(0, "--track-name 0:English(US) --default-track 0:yes " +'"' + str(path.realpath(sub_file)) + '" ')
+
+                elif sub_file.endswith(".enGB.ass"):
+                    subtitles_files.insert(0, "--track-name 0:English(UK) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+
+                elif sub_file.endswith(".esLA.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Español --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".esES.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Español(España) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".ptBR.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Português(Brasil) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".ptPT.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Português(Portugal) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".frFR.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Français(France) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".deDE.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Deutsch --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".arME.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Arabic --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                elif sub_file.endswith(".itIT.ass"):
+                    subtitles_files.insert(0, "--track-name 0:Italiano --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
+                else:
+                    # subtitles_files.append('"' + str(path.realpath(sub_file)) + '"')
+                    subtitles_files.insert(0, "--track-name 0:und --default-track 0:no " + '"' + str(
+                        path.realpath(sub_file)) + '" ')
+
+            print("-----------")
+            print(subtitles_files)
+            print("-----------")
+            mkv_merge_command = 'mkvmerge.exe --ui-language en --output "%s" ' % str(file_name).replace(".mp4", ".mkv") + '"' + str(file_name) + '" ' + ' '.join(subtitles_files)
+            print(mkv_merge_command)
+
+            print("-----------")
+
+            try:
+                call(mkv_merge_command)
+
+                for video_file in glob("*.mkv"):
+                    try:
+                        move(video_file, "Output")
+                    except Exception as e:
+                        print(str(e))
+                        pass
+
+                for video in glob("*.mp4"):
+                    remove(path.realpath(video))
+
+                for sub_file_delete in glob("*.ass"):
+                    remove(path.realpath(sub_file_delete))
+
+            except Exception as FileMuxingException:
+                print("Sees like I couldn't mux the files.")
+                print("Check whether the MKVMERGE.exe is in PATH or not.")
+                print(FileMuxingException)
+
+                for video_file in glob("*.mp4"):
+                    try:
+                        move(video_file, "Output")
+                    except Exception as e:
+                        print(str(e))
+                        pass
+                for sub_files in glob("*.ass"):
+                    try:
+                        move(sub_files, "Output")
+                    except Exception as e:
+                        print(str(e))
+                        pass
 
 
     def wholeShow(self, url, cookie, token, language, resolution, skipper):
