@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from cfscrape import create_scraper
-from requests import session
-from re import search, findall, match, sub
-from os import getcwd, name, remove
-from subprocess import call, check_output
+import cfscrape
+import requests
+import re
+# from os import getcwd, name, remove
+# from os import path, makedirs
+import os
+# from subprocess import call, check_output
+import subprocess
 # External libs have been taken from youtube-dl for decoding the subtitles.
 from external.utils import bytes_to_intlist, intlist_to_bytes
 from external.aes import aes_cbc_decrypt
@@ -14,10 +17,10 @@ import zlib
 import base64
 from hashlib import sha1
 from math import pow, sqrt, floor
-from os import path, makedirs
 from glob import glob
 from shutil import move
 from sys import exit
+import sys
 import logging
 from anime_dl import animeName
 
@@ -30,17 +33,17 @@ THIS REALLY STINX! Read the code at your own risk.
 class CrunchyRoll(object):
     def __init__(self, url, password, username, resolution, language, skipper, logger):
         if logger == "True":
-            logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG, encoding="utf-8")
+            logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG,
+                                encoding="utf-8")
 
         Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
         Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
 
-        Crunchy_Show = match(Crunchy_Show_regex, url)
-        Crunchy_Video = match(Crunchy_Video_regex, url)
+        Crunchy_Show = re.match(Crunchy_Show_regex, url)
+        Crunchy_Video = re.match(Crunchy_Video_regex, url)
 
         if Crunchy_Video:
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
-            logging.debug("Cookies : %s\nToken : %s" % (cookies, Token))
             if skipper == "yes":
                 self.onlySubs(url=url, cookies=cookies)
             else:
@@ -49,15 +52,15 @@ class CrunchyRoll(object):
         elif Crunchy_Show:
 
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
-            logging.debug("Cookies : %s\nToken : %s" % (cookies, Token))
-            self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution, skipper=skipper)
+            self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution,
+                           skipper=skipper)
 
-    def loginCheck(self, htmlsource):
+    def login_check(self, htmlsource):
         # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
         # If this is not found, you're probably not logged in and you'll just get 360p or 480p.
 
-        titleCheck = search(r'\<title\>(.*?)\</title\>',
-                            str(htmlsource)).group(1)
+        titleCheck = re.search(r'\<title\>(.*?)\</title\>',
+                               str(htmlsource)).group(1)
         if str(titleCheck) == "Redirecting...":
             return True
         else:
@@ -67,47 +70,49 @@ class CrunchyRoll(object):
 
         headers = {
             'User-Agent':
-            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
             'Referer':
-            'https://www.crunchyroll.com/login'
+                'https://www.crunchyroll.com/login'
         }
 
-        sess = session()
-        sess = create_scraper(sess)
+        sess = requests.session()
+        sess = cfscrape.create_scraper(sess)
         print("Trying to login...")
-        initialPagefetch = sess.get(
-            url='https://www.crunchyroll.com/login', headers=headers).text
-        logging.debug("initialPageFetch %s" % initialPagefetch)
-        initialCookies = sess.cookies
-        logging.debug("initialCokies %s" % initialCookies)
-        csrfToken = search(r'login_form\[\_token\]\"\ value\=\"(.*?)\"',
-                           str(initialPagefetch)).group(1)
-        logging.debug("csrfToken : %s" % csrfToken)
-        # print(csrfToken)
 
-        payload = {
-            'login_form[name]': '%s' % username,
-            'login_form[password]': '%s' % password,
-            'login_form[redirect_url]': '/',
-            'login_form[_token]': '%s' % csrfToken
-        }
+        initial_page_fetch = sess.get(url='https://www.crunchyroll.com/login', headers=headers)
 
-        loginPost = sess.post(
-            url='https://www.crunchyroll.com/login',
-            data=payload,
-            headers=headers,
-            cookies=initialCookies)
+        if initial_page_fetch.status_code == 200:
+            initial_page_source = initial_page_fetch.text.encode("utf-8")
+            initial_cookies = sess.cookies
+            csrf_token = re.search(r'login_form\[\_token\]\"\ value\=\"(.*?)\"',
+                                   str(initial_page_source)).group(1)
 
-        if self.loginCheck(htmlsource=loginPost.text):
-            print("Logged in successfully...")
-            resp = sess.get(
-                url=url, headers=headers,
-                cookies=initialCookies).text.encode('utf-8')
-            # video_id = int(str(search(r'div\[media_id\=(.*?)\]', str(resp)).group(1)).strip())
-            #
-            return initialCookies, csrfToken
+            payload = {
+                'login_form[name]': '%s' % username,
+                'login_form[password]': '%s' % password,
+                'login_form[redirect_url]': '/',
+                'login_form[_token]': '%s' % csrf_token
+            }
+
+            login_post = sess.post(
+                url='https://www.crunchyroll.com/login',
+                data=payload,
+                headers=headers,
+                cookies=initial_cookies)
+
+            if self.login_check(htmlsource=login_post.text.encode('utf-8')):
+                print("Logged in successfully...")
+                resp = sess.get(
+                    url=url, headers=headers,
+                    cookies=initial_cookies)
+                # video_id = int(str(re.search(r'div\[media_id\=(.*?)\]', str(resp)).group(1)).strip())
+                #
+                return initial_cookies, csrf_token
+            else:
+                print("Unable to Log you in. Check credentials again.")
         else:
-            print("Unable to Log you in. Check credentials again.")
+            print("Couldn't connect to the login page...")
+            print("Website returned : %s" % str(initial_page_fetch.status_code))
 
     def rtmpDump(self, host, file, url, filename):
         # print("Downloading RTMP DUMP STREAM!")
@@ -117,192 +122,220 @@ class CrunchyRoll(object):
         serverAddress = str(host.split("/ondemand/")[0]) + "/ondemand/"
         authentication = "ondemand/" + str(host.split("/ondemand/")[1])
 
-        rtmpDumpCommand = "rtmpdump -r \"%s\" -a \"%s\" -f \"WIN 25,0,0,148\" -W \"http://www.crunchyroll.com/vendor/ChromelessPlayerApp-c0d121b.swf\" -p \"%s\" -y \"%s\" -o \"%s\"" % (serverAddress, authentication, url, file, filename)
+        rtmpDumpCommand = "rtmpdump -r \"%s\" -a \"%s\" -f \"WIN 25,0,0,148\" -W \"http://www.crunchyroll.com/vendor/ChromelessPlayerApp-c0d121b.swf\" -p \"%s\" -y \"%s\" -o \"%s\"" % (
+            serverAddress, authentication, url, file, filename)
         logging.debug("rtmpDumpCommand : %s" % rtmpDumpCommand)
 
         try:
-            call(rtmpDumpCommand)
+            subprocess.call(rtmpDumpCommand)
         except Exception:
             print("Please make sure that rtmpdump is present in the PATH or THIS DIRECTORY!")
-            exit()
+            sys.exit()
+
+    def duplicate_remover(self, seq):
+        # https://stackoverflow.com/a/480227
+        seen = set()
+        seen_add = seen.add
+        return [x for x in seq if not (x in seen or seen_add(x))]
 
     def singleEpisode(self, url, cookies, token, resolution):
-        # print("Inside single episode")
-        current_directory = getcwd()
         video_id = str(url.split('-')[-1]).replace("/", "")
-        logging.debug("video_id : %s" % video_id)
-        # print("URL : %s\nCookies : %s\nToken : %s\nResolution : %s\nMedia ID : %s" % (url, cookies, token, resolution, video_id))
+        logging.debug("video_id : %s", video_id)
         headers = {
             'User-Agent':
-            'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
             'Upgrade-Insecure-Requests':
-            '1',
+                '1',
             'Accept-Encoding':
-            'gzip, deflate'
+                'gzip, deflate'
         }
 
-        sess = session()
-        sess = create_scraper(sess)
+        sess = requests.session()
+        sess = cfscrape.create_scraper(sess)
 
-        rtmpDL = "false" # Fix for #11
-        logging.debug("Downloading Resolution : %s" % resolution)
+        info_url = ""
 
         if str(resolution).lower() in ['1080p', '1080', 'fhd', 'best']:
-            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (video_id, url)
+            info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
+                video_id, url)
 
         elif str(resolution).lower() in ['720p', '720', 'hd']:
-            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=62&current_page=%s" % (video_id, url)
+            info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=62&current_page=%s" % (
+                video_id, url)
 
         elif str(resolution).lower() in ['480p', '480', 'sd']:
-            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
-            video_id, url)
+            info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
+                video_id, url)
         elif str(resolution).lower() in ['360p', '360', 'cancer']:
-            infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
-            video_id, url)
+            info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
+                video_id, url)
 
-        logging.debug("infoURL : %s" % infoURL)
-        # print(infoURL)
+        logging.debug("info_url : %s", info_url)
 
-        xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text
-        logging.debug("xml_page : %s" % xml_page.encode("utf-8"))
+        xml_page_connect = sess.get(url=info_url, headers=headers, cookies=cookies)
 
-        try:
-            m3u8_link_raw = str(search(r'\<file\>(.*?)\<\/file\>', xml_page).group(1)).strip().replace("&amp;", "&")
-            logging.debug("m3u8_link_raw : %s" % m3u8_link_raw)
-
-            if "mp4:" in m3u8_link_raw:
-                rtmpDL = "True"
-                hostLink = str(search(r'\<host\>(.*?)\<\/host\>', xml_page).group(1)).strip().replace("&amp;", "&")
-
-        except Exception:
-            print("Error Found")
-            exit()
-        anime_name = str(
-                search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page)
-                    .group(1)).strip().replace("â", "'").replace(
-                ":", " - ").replace("&#039;", "'")
-        logging.debug("anime_name : %s" % anime_name)
-
-        episode_number = str(
-                search(r'\<episode_number\>(.*?)\<\/episode_number\>',
-                       xml_page).group(1)).strip()
-        logging.debug("episode_number : %s" % episode_number)
-
-        width = str(
-                search(r'\<width\>(.*?)\<\/width\>', xml_page).group(
-                    1)).strip()
-        logging.debug("width : %s" % width)
-
-        height = str(
-                search(r'\<height\>(.*?)\<\/height\>', xml_page).group(
-                    1)).strip()
-        logging.debug("height : %s" % height)
-
-        reso = str(width).strip() + "X" + str(height).strip()
-
-        file_name = animeName.animeName().nameEdit(animeName = anime_name, episodeNumber = episode_number, resolution = reso)
-        # print(file_name)
-
-        logging.debug("file_name : %s" % file_name)
-
-        if not path.exists("Output"):
-            makedirs("Output")
-
-        if path.isfile("Output/" + file_name):
-            print('[Anime-dl] File Exist! Skipping %s\n' % file_name)
-            pass
-        else:
-            self.subFetcher(
-                    xml=str(xml_page),
-                    anime_name=anime_name,
-                    episode_number=episode_number)
-            # UNCOMMENT THIS LINE!!!
-            if rtmpDL == "True":
-                self.rtmpDump(host=hostLink, file=m3u8_link_raw, url=url, filename=file_name)
-            else:
-                m3u8_file = sess.get(
-                        url=m3u8_link_raw, cookies=cookies,
-                        headers=headers).text.splitlines()[2]
-                # print("M3u8 : %s" % m3u8_file)
-                ffmpeg_command = "ffmpeg -i \"%s\" -c copy -bsf:a aac_adtstoasc \"%s\"" % (
-                        m3u8_file, file_name)
-                logging.debug("ffmpeg_command : %s" % ffmpeg_command)
-                call(ffmpeg_command)
-
-            subtitles_files = []
-            for sub_file in glob("*.ass"):
-                if sub_file.endswith(".enUS.ass"):
-                    subtitles_files.insert(0, "--track-name 0:English(US) --default-track 0:yes " +'"' + str(path.realpath(sub_file)) + '" ')
-
-                elif sub_file.endswith(".enGB.ass"):
-                    subtitles_files.insert(0, "--track-name 0:English(UK) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-
-                elif sub_file.endswith(".esLA.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Español --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".esES.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Español(España) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".ptBR.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Português(Brasil) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".ptPT.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Português(Portugal) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".frFR.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Français(France) --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".deDE.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Deutsch --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".arME.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Arabic --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                elif sub_file.endswith(".itIT.ass"):
-                    subtitles_files.insert(0, "--track-name 0:Italiano --default-track 0:no " +'"' + str(path.realpath(sub_file)) + '" ')
-                else:
-                    # subtitles_files.append('"' + str(path.realpath(sub_file)) + '"')
-                    subtitles_files.insert(0, "--track-name 0:und --default-track 0:no " + '"' + str(
-                        path.realpath(sub_file)) + '" ')
-
-            print("-----------")
-            print(subtitles_files)
-            print("-----------")
-            mkv_merge_command = 'mkvmerge.exe --ui-language en --output "%s" ' % str(file_name).replace(".mp4", ".mkv") + '"' + str(file_name) + '" ' + ' '.join(subtitles_files)
-            print(mkv_merge_command)
-
-            print("-----------")
+        if xml_page_connect.status_code == 200:
+            xml_page = xml_page_connect.text.encode("utf-8")
 
             try:
-                call(mkv_merge_command)
+                m3u8_file_link = str(re.search(r'<file>(.*?)</file>', xml_page).group(1)).replace("&amp;", "&")
+                logging.debug("m3u8_file_link : %s", m3u8_file_link)
 
-                for video_file in glob("*.mkv"):
+                if not m3u8_file_link:
+                    # If no m3u8 found, try the rtmpdump...
                     try:
-                        move(video_file, "Output")
-                    except Exception as e:
-                        print(str(e))
+                        host_link = re.search(r'<host>(.*?)</host>', xml_page).group(1)
+                        logging.debug("Found RTMP DUMP!")
+                        print("RTMP streams not supported currently...")
+                    except Exception as NoRtmpDump:
+                        print("No RTMP Streams Found...")
+                        print(NoRtmpDump)
+                else:
+                    anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)
+                    episode_number = re.search(r'<episode_number>(.*?)</episode_number>',
+                                               xml_page.decode("utf-8")).group(1)
+                    video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
+                    video_height = re.search(r'<height>(.*?)</height>', xml_page.decode("utf-8")).group(1)
+
+                    video_resolution = str(video_width) + "x" + str(video_height)
+
+                    file_name = animeName.animeName().nameEdit(animeName=anime_name, episodeNumber=episode_number,
+                                                               resolution=video_resolution)
+                    logging.debug("anime_name : %s", anime_name)
+                    logging.debug("episode_number : %s", episode_number)
+                    logging.debug("video_resolution : %s", video_resolution)
+                    logging.debug("file_name : %s", file_name)
+
+                    if not os.path.exists("Output"):
+                        os.makedirs("Output")
+
+                    if os.path.isfile("Output/" + file_name):
+                        print('[Anime-dl] File Exists! Skipping %s\n' % file_name)
                         pass
+                    else:
+                        self.subFetcher(
+                            xml=str(xml_page),
+                            episode_number=episode_number,
+                            file_name=file_name)
 
-                for video in glob("*.mp4"):
-                    remove(path.realpath(video))
+                        m3u8_file_connect = sess.get(url=m3u8_file_link, cookies=cookies, headers=headers)
+                        try:
+                            m3u8_file_text = m3u8_file_connect.text.splitlines()[2]
+                            logging.debug("m3u8_file_text : %s", m3u8_file_text)
 
-                for sub_file_delete in glob("*.ass"):
-                    remove(path.realpath(sub_file_delete))
+                            ffmpeg_command = 'ffmpeg -i "{0}" -c copy -bsf:a aac_adtstoasc "{1}/{2}"'.format(
+                                m3u8_file_text,
+                                os.getcwd(),
+                                file_name)
+                            logging.debug("ffmpeg_command : %s", ffmpeg_command)
+                            subprocess.call(ffmpeg_command)
 
-            except Exception as FileMuxingException:
-                print("Sees like I couldn't mux the files.")
-                print("Check whether the MKVMERGE.exe is in PATH or not.")
-                print(FileMuxingException)
+                            subtitles_files = []
+                            for sub_file in glob("*.ass"):
+                                if sub_file.endswith(".enUS.ass"):
+                                    subtitles_files.insert(0,
+                                                           "--track-name 0:English(US) --default-track 0:yes " + '"' + str(
+                                                               os.path.realpath(sub_file)) + '" ')
 
-                for video_file in glob("*.mp4"):
-                    try:
-                        move(video_file, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
-                for sub_files in glob("*.ass"):
-                    try:
-                        move(sub_files, "Output")
-                    except Exception as e:
-                        print(str(e))
-                        pass
+                                elif sub_file.endswith(".enGB.ass"):
+                                    subtitles_files.append(
+                                        "--track-name 0:English(UK) --default-track 0:no " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
 
+                                elif sub_file.endswith(".esLA.ass"):
+                                    subtitles_files.append("--track-name 0:Español --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".esES.ass"):
+                                    subtitles_files.append(
+                                        "--track-name 0:Español(España) --default-track 0:no " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".ptBR.ass"):
+                                    subtitles_files.append(
+                                        "--track-name 0:Português(Brasil) --default-track 0:no " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".ptPT.ass"):
+                                    subtitles_files.append(
+                                        "--track-name 0:Português(Portugal) --default-track 0:no " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".frFR.ass"):
+                                    subtitles_files.append(
+                                        "--track-name 0:Français(France) --default-track 0:no " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".deDE.ass"):
+                                    subtitles_files.append("--track-name 0:Deutsch --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".arME.ass"):
+                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".itIT.ass"):
+                                    subtitles_files.append("--track-name 0:Italiano --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".arME.ass"):
+                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+                                elif sub_file.endswith(".trTR.ass"):
+                                    subtitles_files.append("--track-name 0:Türkçe --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+                                else:
+                                    subtitles_files.append("--track-name 0:und --default-track 0:no " + '"' + str(
+                                        os.path.realpath(sub_file)) + '" ')
+
+                            subs_files = self.duplicate_remover(subtitles_files)
+                            logging.debug("subs_files : %s", subs_files)
+
+                            mkv_merge_command = 'mkvmerge.exe --ui-language en --output "%s" ' % str(file_name).replace(
+                                ".mp4",
+                                ".mkv") + '"' + str(
+                                file_name) + '" ' + ' '.join(subs_files)
+                            logging.debug("mkv_merge_command : %s", mkv_merge_command)
+
+                            try:
+                                subprocess.call(mkv_merge_command)
+
+                                for video_file in glob("*.mkv"):
+                                    try:
+                                        move(video_file, "Output")
+                                    except Exception as e:
+                                        print(str(e))
+                                        pass
+
+                                for video in glob("*.mp4"):
+                                    os.remove(os.path.realpath(video))
+
+                                for sub_file_delete in glob("*.ass"):
+                                    os.remove(os.path.realpath(sub_file_delete))
+
+                            except Exception as FileMuxingException:
+                                print("Sees like I couldn't mux the files.")
+                                print("Check whether the MKVMERGE.exe is in PATH or not.")
+                                print(FileMuxingException)
+
+                                for video_file in glob("*.mp4"):
+                                    try:
+                                        move(video_file, "Output")
+                                    except Exception as e:
+                                        print(str(e))
+                                        pass
+                                for sub_files in glob("*.ass"):
+                                    try:
+                                        move(sub_files, "Output")
+                                    except Exception as e:
+                                        print(str(e))
+                                        pass
+                        except Exception as NoM3u8File:
+                            print("Couldn't connect to the m3u8 file download link...")
+                            print(NoM3u8File)
+                            sys.exit(1)
+
+            except Exception as NotAvailable:
+                print("Seems like this video isn't available...")
+                print(NotAvailable)
+        else:
+            print("Could not connect to Crunchyroll's media page.")
+            print("It reurned : {0}".format(xml_page_connect.status_code))
 
     def wholeShow(self, url, cookie, token, language, resolution, skipper):
-    	# print("Check my patreon for this : http://patreon.com/Xonshiz")
+        # print("Check my patreon for this : http://patreon.com/Xonshiz")
 
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/601.2.7 (KHTML, like Gecko) Version/9.0.1 Safari/601.2.7',
@@ -310,13 +343,14 @@ class CrunchyRoll(object):
             'Accept-Encoding': 'gzip, deflate'
         }
 
-        sess = session()
-        sess = create_scraper(sess)
-        page_source = sess.get(url=url, headers=headers, cookies=cookie).text
+        sess = requests.session()
+        sess = cfscrape.create_scraper(sess)
+        page_source = sess.get(url=url, headers=headers, cookies=cookie).text.encode("utf-8")
 
         dub_list = []
         sub_list = []
-        for episode_link, episode_type in findall(r'\<a href\=\"\/(.*?)\"\ title\=\"(.*?)\"\ class\=\"portrait\-element\ block\-link', str(page_source)):
+        for episode_link, episode_type in re.findall(
+                r'\<a href\=\"\/(.*?)\"\ title\=\"(.*?)\"\ class\=\"portrait\-element\ block\-link', str(page_source)):
             if "(Dub)" in str(episode_type):
                 dub_list.append(str(url) + str(episode_link))
             else:
@@ -324,7 +358,7 @@ class CrunchyRoll(object):
 
         if len(dub_list) == 0 and len(sub_list) == 0:
             print("Could not find the show links. Report on https://github.com/Xonshiz/anime-dl/issues/new")
-            exit()
+            sys.exit()
 
         if skipper == "yes":
             # print("DLing everything")
@@ -340,8 +374,9 @@ class CrunchyRoll(object):
                 # If the "dub_list" is empty, that means there are no English Dubs for the show, or CR changed something.
                 if len(dub_list) == 0:
                     print("No English Dub Available For This Series.")
-                    print("If you can see the Dubs, please open an Issue on https://github.com/Xonshiz/anime-dl/issues/new")
-                    exit()
+                    print(
+                        "If you can see the Dubs, please open an Issue on https://github.com/Xonshiz/anime-dl/issues/new")
+                    sys.exit()
                 else:
                     print("Total Episodes to download : %s" % len(dub_list))
                     for episode_url in dub_list[::-1]:
@@ -359,34 +394,36 @@ class CrunchyRoll(object):
                     print("-----------------------------------------------------------")
                     print("\n")
 
-    def subFetcher(self, xml, anime_name, episode_number):
+    def subFetcher(self, xml, episode_number, file_name):
+        logging.debug("\n----- Subs Downloading Started -----\n")
         headers = {
             'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/601.2.7 (KHTML, like Gecko) Version/9.0.1 Safari/601.2.7',
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/601.2.7 (KHTML, like Gecko) Version/9.0.1 Safari/601.2.7',
             'Referer':
-            'https://www.crunchyroll.com'
+                'https://www.crunchyroll.com'
         }
 
-        sess = session()
-        sess = create_scraper(sess)
-        for sub_id, sub_lang, sub_lang2 in findall(
+        sess = requests.session()
+        sess = cfscrape.create_scraper(sess)
+        for sub_id, sub_lang, sub_lang2 in re.findall(
                 r'subtitle_script_id\=(.*?)\'\ title\=\'\[(.*?)\]\ (.*?)\'',
                 str(xml)):
-            # print("Sub ID : %s\t| Sub Lang : %s" % (sub_id, sub_lang))
-            logging.debug("sub_id : %s\nsub_lang : %s\nsub_lang2 : %s" % (sub_id, sub_lang, sub_lang2))
+
             xml_return = str(
                 sess.get(
                     url="http://www.crunchyroll.com/xml/?req=RpcApiSubtitle_GetXml&subtitle_script_id=%s"
-                    % sub_id,
+                        % sub_id,
                     headers=headers).text)
-            # print(xml_return)
+
             iv = str(
-                search(r'\<iv\>(.*?)\<\/iv\>', xml_return).group(1)).strip()
-            logging.debug("iv : %s" % iv)
+                re.search(r'\<iv\>(.*?)\<\/iv\>', xml_return).group(1)).strip()
+
             data = str(
-                search(r'\<data\>(.*?)\<\/data\>', xml_return).group(
+                re.search(r'\<data\>(.*?)\<\/data\>', xml_return).group(
                     1)).strip()
-            logging.debug("data : %s" % data)
+            # logging.debug("data : %s", data)
+            logging.debug("iv : %s", iv)
+
             # print("Sub ID : %s\t| iv : %s\t| data : %s" % (sub_id, iv, data))
             subtitle = self._decrypt_subtitles(data, iv,
                                                sub_id).decode('utf-8')
@@ -395,28 +432,23 @@ class CrunchyRoll(object):
             sub_data = self._convert_subtitles_to_ass(sub_root)
             # print(sub_root)
             lang_code = str(
-                search(r'lang_code\=\"(.*?)\"', str(subtitle)).group(
+                re.search(r'lang_code\=\"(.*?)\"', str(subtitle)).group(
                     1)).strip()
-            logging.debug("lang_code : %s" % lang_code)
-            sub_file_name = sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(anime_name)) + " - " + str(
-                episode_number) + ".%s.ass" % lang_code
+            sub_file_name = str(file_name).replace(".mp4", ".") + str(lang_code) + ".ass"
+
+            print("Downloading {0} ...".format(sub_file_name))
 
             try:
-                MAX_PATH = int(check_output(['getconf', 'PATH_MAX', '/']))
-                #print(MAX_PATH)
-            except (Exception):
-                MAX_PATH = 4096
-
-            if len(sub_file_name) > MAX_PATH:
-                sub_file_name = sub_file_name[:MAX_PATH]
-            # print(sub_file_name)
-            print("Writing subtitles to files...")
-            with open(sub_file_name, "w", encoding="utf-8") as sub_file:
-                sub_file.write(str(sub_data))
+                with open(str(os.getcwd()) + "/" + str(sub_file_name), "wb") as sub_file:
+                    sub_file.write(sub_data.encode("utf-8"))
+            except Exception as EncodingException:
+                print("Couldn't write the subtitle file...skipping.")
+                pass
+        logging.debug("\n----- Subs Downloaded -----\n")
 
     def onlySubs(self, url, cookies):
         # print("Running only subs")
-        current_directory = getcwd()
+        current_directory = os.getcwd()
         video_id = str(url.split('-')[-1]).replace("/", "")
         # print("URL : %s\nCookies : %s\nToken : %s\nResolution : %s\nMedia ID : %s" % (url, cookies, token, resolution, video_id))
         headers = {
@@ -425,28 +457,29 @@ class CrunchyRoll(object):
             'Accept-Encoding': 'gzip, deflate'
         }
 
-        sess = session()
-        sess = create_scraper(sess)
+        sess = requests.session()
+        sess = cfscrape.create_scraper(sess)
         infoURL = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
-        video_id, url)
-        xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text
+            video_id, url)
+        xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text.encode("utf-8")
 
-        m3u8_link_raw = str(search(r'\<file\>(.*?)\<\/file\>', xml_page).group(1)).strip().replace("&amp;", "&")
-        anime_name = str(search(r'\<series_title\>(.*?)\<\/series_title\>', xml_page).group(1)).strip().replace("â",
-                                                                                                                "'").replace(
-            ":", " - ").replace("&#039;", "'")
-        episode_number = str(search(r'\<episode_number\>(.*?)\<\/episode_number\>', xml_page).group(1)).strip()
-        width = str(search(r'\<width\>(.*?)\<\/width\>', xml_page).group(1)).strip()
-        height = str(search(r'\<height\>(.*?)\<\/height\>', xml_page).group(1)).strip()
-        # print("m3u8_link : %s\nanime_name : %s\nepisode_number : %s\nwidth : %s\nheight : %s\n" % (m3u8_link_raw, anime_name, episode_number, width, height))
-        if not path.exists("Output"):
-            makedirs("Output")
+        anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)
+        episode_number = re.search(r'<episode_number>(.*?)</episode_number>', xml_page.decode("utf-8")).group(1)
+        video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
+        video_height = re.search(r'<height>(.*?)</height>', xml_page.decode("utf-8")).group(1)
 
-        self.subFetcher(xml=str(xml_page), anime_name=anime_name, episode_number=episode_number)
+        video_resolution = str(video_width) + "x" + str(video_height)
 
-        for mkv_file in glob("*.ass"):
+        file_name = animeName.animeName().nameEdit(animeName=anime_name, episodeNumber=episode_number,
+                                                   resolution=video_resolution)
+        if not os.path.exists("Output"):
+            os.makedirs("Output")
+
+        self.subFetcher(xml=xml_page, episode_number=episode_number, file_name=file_name)
+
+        for sub_file in glob("*.ass"):
             try:
-                move(mkv_file, current_directory + "/Output/")
+                move(sub_file, current_directory + "/Output/")
             except Exception as e:
                 print("Couldn't move the file. Got following error : \n")
                 print(e)

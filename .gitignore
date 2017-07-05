@@ -61,3 +61,6 @@ Temporary Items
 anime_dl/build/__main__/warn__main__.txt
 *.ass
 *.mp4
+*.log
+*.mkv
+anime_dl/sites/funimation - Copy.py

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# from urllib.parse import urlparse
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -40,6 +39,10 @@ class AnimeDL(object):
         # print("Got url : %s" % url)
         # Verify that we have a sane url and return which website it belongs
         # to.
+
+        # Fix for script not responding when www.crunchyrol.com/... type links are given.
+        if "http://" not in url:
+            url = "http://" + str(url)
 
         # if there's not http:/, then netloc is empty.
         # Gotta add the "if crunchyroll in url..."

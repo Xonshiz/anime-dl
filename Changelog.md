@@ -16,3 +16,4 @@
 - Site support for Funimation.com [2017.05.30]
 - Fix for #8 [2017.05.30]
 - Muxing All The Subtitles [2017.07.03]
+- Fix for special characters and #15 [2017.07.05]
