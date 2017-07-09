@@ -28,6 +28,7 @@ class main(object):
         required_args.add_argument('-i', '--input', nargs=1, help='Inputs the URL to anime.')
         parser.add_argument('-r', '--resolution', nargs=1, help='Inputs the URL to anime.', default='720p')
         parser.add_argument('-l', '--language', nargs=1, help='Selects the language for the show.', default='Japanese')
+        parser.add_argument('-rn', '--range', nargs=1, help='Specifies the range of episodes to download.', default='All')
         parser.add_argument('--skip', action='store_true', help='skips the video download and downloads only subs.')
         parser.add_argument("-v", "--verbose", help="Prints important debugging messages on screen.",
                             action="store_true")
@@ -66,5 +67,7 @@ class main(object):
                 args.resolution = args.resolution[0]
             if type(args.language) == list:
                 args.language = args.language[0]
+            if type(args.range) == list:
+                args.range = args.range[0]
 
-            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language, skipper=skipper, logger = logger)
+            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language, skipper=skipper, logger = logger, episode_range=args.range)

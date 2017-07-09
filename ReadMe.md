@@ -90,6 +90,7 @@ Currently, the script supports these arguments :
 --skip                                 Skip video downloads (Will only download subtitles)
 -v,--verbose                           Starts Verbose Logging for detailed information.
 -l,--language                          Selects the language for the show. (default = Japanese) [Langs = english, dub, sub, Japanese, eng]
+-rn,--range                            Selects the range of episodes to download (Default = All) [ Ex : --range 1-10 (This will download first 10 episodes of a series)]
 ```
 
 ## Usage
@@ -128,6 +129,9 @@ URL can be any URL of the [supported websites](https://github.com/Xonshiz/anime-
     * Single Episode : [http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying/episode-13-happy-days-678059](http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying/episode-13-happy-days-678059)
     * Whole Show : [http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying](http://www.crunchyroll.com/i-cant-understand-what-my-husband-is-saying)
 
+### Note :
+
+* If you want to include some fonts in the muxed video, you need to make a folder named "Fonts" in the same directory as that of this script and put all the fonts inside that directory. The script should take them all.
 
 ## Features
 This is a very basic and small sript, so at the moment it only have a few features.

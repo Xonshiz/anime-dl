@@ -15,7 +15,7 @@ website. I don't remember why I added an extra step, I really don't. Oh well, it
 
 class AnimeDL(object):
 
-    def __init__(self, url, username, password, resolution, language, skipper, logger):
+    def __init__(self, url, username, password, resolution, language, skipper, logger, episode_range):
 
         website = str(self.honcho(url=url[0]))
 
@@ -26,7 +26,16 @@ class AnimeDL(object):
             else:
 
                 sites.crunchyroll.CrunchyRoll(
-                    url=url[0], password=password, username=username, resolution=resolution, language=language, skipper=skipper, logger = logger)
+                    url=url[0], password=password, username=username, resolution=resolution, language=language, skipper=skipper, logger = logger, episode_range=episode_range)
+
+        elif website == "VRV":
+            print("Under development...")
+            # if not url[0] or not username[0] or not password[0]:
+            #     print("Please enter the required arguments. Run __main__.py --help")
+            #     exit()
+            # else:
+            #
+            #     sites.vrv.Vrv(url=url, password=password, username=username, resolution=resolution)
 
         elif website == "Funimation":
             if not url[0] or not username[0] or not password[0]:
@@ -41,17 +50,21 @@ class AnimeDL(object):
         # to.
 
         # Fix for script not responding when www.crunchyrol.com/... type links are given.
-        if "http://" not in url:
+        if "https://" in url:
+            url = str(url)
+        elif "http://" not in url:
             url = "http://" + str(url)
 
         # if there's not http:/, then netloc is empty.
         # Gotta add the "if crunchyroll in url..."
         # print(url)
         domain = urlparse(url).netloc
-        # print(domain)
 
         if domain in ["www.funimation.com", "funimation.com"]:
             return "Funimation"
 
         elif domain in ["www.crunchyroll.com", "crunchyroll.com"]:
             return "Crunchyroll"
+
+        elif domain in ["www.vrv.co", "vrv.co"]:
+            return "VRV"

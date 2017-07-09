@@ -31,7 +31,7 @@ THIS REALLY STINX! Read the code at your own risk.
 
 
 class CrunchyRoll(object):
-    def __init__(self, url, password, username, resolution, language, skipper, logger):
+    def __init__(self, url, password, username, resolution, language, skipper, logger, episode_range):
         if logger == "True":
             logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG,
                                 encoding="utf-8")
@@ -53,7 +53,7 @@ class CrunchyRoll(object):
 
             cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
             self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution,
-                           skipper=skipper)
+                           skipper=skipper, episode_range=episode_range)
 
     def login_check(self, htmlsource):
         # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
@@ -139,6 +139,7 @@ class CrunchyRoll(object):
         return [x for x in seq if not (x in seen or seen_add(x))]
 
     def singleEpisode(self, url, cookies, token, resolution):
+
         video_id = str(url.split('-')[-1]).replace("/", "")
         logging.debug("video_id : %s", video_id)
         headers = {
@@ -234,59 +235,68 @@ class CrunchyRoll(object):
                             for sub_file in glob("*.ass"):
                                 if sub_file.endswith(".enUS.ass"):
                                     subtitles_files.insert(0,
-                                                           "--track-name 0:English(US) --default-track 0:yes " + '"' + str(
+                                                           "--track-name 0:English(US) --default-track 0:yes --sub-charset 0:utf-8 " + '"' + str(
                                                                os.path.realpath(sub_file)) + '" ')
 
                                 elif sub_file.endswith(".enGB.ass"):
                                     subtitles_files.append(
-                                        "--track-name 0:English(UK) --default-track 0:no " + '"' + str(
+                                        "--track-name 0:English(UK) --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                             os.path.realpath(sub_file)) + '" ')
 
                                 elif sub_file.endswith(".esLA.ass"):
-                                    subtitles_files.append("--track-name 0:Español --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Español --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".esES.ass"):
                                     subtitles_files.append(
-                                        "--track-name 0:Español(España) --default-track 0:no " + '"' + str(
+                                        "--track-name 0:Español(España) --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                             os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".ptBR.ass"):
                                     subtitles_files.append(
-                                        "--track-name 0:Português(Brasil) --default-track 0:no " + '"' + str(
+                                        "--track-name 0:Português(Brasil) --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                             os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".ptPT.ass"):
                                     subtitles_files.append(
-                                        "--track-name 0:Português(Portugal) --default-track 0:no " + '"' + str(
+                                        "--track-name 0:Português(Portugal) --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                             os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".frFR.ass"):
                                     subtitles_files.append(
-                                        "--track-name 0:Français(France) --default-track 0:no " + '"' + str(
+                                        "--track-name 0:Français(France) --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                             os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".deDE.ass"):
-                                    subtitles_files.append("--track-name 0:Deutsch --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Deutsch --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".arME.ass"):
-                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".itIT.ass"):
-                                    subtitles_files.append("--track-name 0:Italiano --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Italiano --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".arME.ass"):
-                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".trTR.ass"):
-                                    subtitles_files.append("--track-name 0:Türkçe --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Türkçe --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 else:
-                                    subtitles_files.append("--track-name 0:und --default-track 0:no " + '"' + str(
+                                    subtitles_files.append("--track-name 0:und --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
 
                             subs_files = self.duplicate_remover(subtitles_files)
                             logging.debug("subs_files : %s", subs_files)
+                            #  --attachment-name trebucit.ttf --attachment-mime-type application/x-truetype-font --attach-file ^"G:\Fonts\trebucit.ttf
+
+                            font_files = [os.path.realpath(font_file) for font_file in glob(str(os.getcwd()) + "/Fonts/*.*")]
+
+                            fonts = '--attachment-mime-type application/x-truetype-font --attach-file "' + str('" --attachment-mime-type application/x-truetype-font --attach-file "'.join(font_files)) + '"'
+
+                            if len(font_files) == 0:
+                                fonts = ''
 
                             mkv_merge_command = 'mkvmerge.exe --ui-language en --output "%s" ' % str(file_name).replace(
                                 ".mp4",
                                 ".mkv") + '"' + str(
-                                file_name) + '" ' + ' '.join(subs_files)
+                                file_name) + '" ' + ' '.join(subs_files) + ' ' + str(fonts)
+
                             logging.debug("mkv_merge_command : %s", mkv_merge_command)
 
                             try:
@@ -334,7 +344,7 @@ class CrunchyRoll(object):
             print("Could not connect to Crunchyroll's media page.")
             print("It reurned : {0}".format(xml_page_connect.status_code))
 
-    def wholeShow(self, url, cookie, token, language, resolution, skipper):
+    def wholeShow(self, url, cookie, token, language, resolution, skipper, episode_range):
         # print("Check my patreon for this : http://patreon.com/Xonshiz")
 
         headers = {
@@ -348,17 +358,27 @@ class CrunchyRoll(object):
         page_source = sess.get(url=url, headers=headers, cookies=cookie).text.encode("utf-8")
 
         dub_list = []
-        sub_list = []
+        ep_sub_list = []
         for episode_link, episode_type in re.findall(
                 r'\<a href\=\"\/(.*?)\"\ title\=\"(.*?)\"\ class\=\"portrait\-element\ block\-link', str(page_source)):
             if "(Dub)" in str(episode_type):
                 dub_list.append(str(url) + str(episode_link))
             else:
-                sub_list.append(str(url) + str(episode_link))
+                ep_sub_list.append(str(url) + str(episode_link))
 
-        if len(dub_list) == 0 and len(sub_list) == 0:
+        if len(dub_list) == 0 and len(ep_sub_list) == 0:
             print("Could not find the show links. Report on https://github.com/Xonshiz/anime-dl/issues/new")
             sys.exit()
+
+        if episode_range != "All":
+            # -1 to shift the episode number accordingly to the INDEX of it. List starts from 0 xD!
+            starting = int(str(episode_range).split("-")[0]) - 1
+            ending = int(str(episode_range).split("-")[1])
+            indexes = [x for x in range(starting, ending)]
+            # [::-1] in sub_list in beginning to start this from the 1st episode and at the last, it is to reverse the list again, becasue I'm reverting it again at the end.
+            sub_list = [ep_sub_list[::-1][x] for x in indexes][::-1]
+        else:
+            sub_list = ep_sub_list
 
         if skipper == "yes":
             # print("DLing everything")
@@ -367,6 +387,7 @@ class CrunchyRoll(object):
                 # cookies, Token = self.webpagedownloader(url=url)
                 # print("Sub list : %s" % sub_list)
                 self.onlySubs(url=episode_url, cookies=cookie)
+
                 print("-----------------------------------------------------------")
                 print("\n")
         else:
@@ -387,6 +408,7 @@ class CrunchyRoll(object):
                         print("\n")
             else:
                 print("Total Episodes to download : %s" % len(sub_list))
+                
                 for episode_url in sub_list[::-1]:
                     # cookies, Token = self.webpagedownloader(url=url)
                     # print("Sub list : %s" % sub_list)

@@ -64,3 +64,5 @@ anime_dl/build/__main__/warn__main__.txt
 *.log
 *.mkv
 anime_dl/sites/funimation - Copy.py
+*.old
+*.ttf

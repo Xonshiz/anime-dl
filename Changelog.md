@@ -17,3 +17,5 @@
 - Fix for #8 [2017.05.30]
 - Muxing All The Subtitles [2017.07.03]
 - Fix for special characters and #15 [2017.07.05]
+- Episode Download Range supprt Added [2017.07.07]
+- Added support to include fonts in the muxed videos [2017.07.09]
