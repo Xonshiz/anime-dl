@@ -19,3 +19,4 @@
 - Fix for special characters and #15 [2017.07.05]
 - Episode Download Range supprt Added [2017.07.07]
 - Added support to include fonts in the muxed videos [2017.07.09]
+- Changed mkvmerge.exe to mkvmerge to support Non-Windows Operating Systems [2017.07.24]

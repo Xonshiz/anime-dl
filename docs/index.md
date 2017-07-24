@@ -31,7 +31,7 @@ Anime-dl is a Command-line program to download anime from CrunchyRoll and Funima
 You can check the list of supported websites [**`HERE`**](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
 
 ## Dependencies Installation
-This script can run on multiple Operating Systems. But, the script depends on some external binaries or libs. We need `FFmpeg` and `Node.js` in our paths. There are some old streams on Crunchyroll which only support `rtmpe` streams, as noted from Issue #9. For this, you need `rtmpdump`.
+This script can run on multiple Operating Systems. But, the script depends on some external binaries or libs. We need `FFmpeg`, `mkvmerge` and `Node.js` in our paths. There are some old streams on Crunchyroll which only support `rtmpe` streams, as noted from Issue #9. For this, you need `rtmpdump`.
 
 You also need [mkvmerge.exe](https://mkvtoolnix.download/downloads.html) in your `PATH` or `Working Directory`.
 

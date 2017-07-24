@@ -292,7 +292,7 @@ class CrunchyRoll(object):
                             if len(font_files) == 0:
                                 fonts = ''
 
-                            mkv_merge_command = 'mkvmerge.exe --ui-language en --output "%s" ' % str(file_name).replace(
+                            mkv_merge_command = 'mkvmerge --ui-language en --output "%s" ' % str(file_name).replace(
                                 ".mp4",
                                 ".mkv") + '"' + str(
                                 file_name) + '" ' + ' '.join(subs_files) + ' ' + str(fonts)
