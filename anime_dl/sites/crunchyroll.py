@@ -360,11 +360,11 @@ class CrunchyRoll(object):
         dub_list = []
         ep_sub_list = []
         for episode_link, episode_type in re.findall(
-                r'\<a href\=\"\/(.*?)\"\ title\=\"(.*?)\"\ class\=\"portrait\-element\ block\-link', str(page_source)):
+                r'\<a href\=\"\/(.*?)\"\ title\=\"(.*?)', str(page_source)):
             if "(Dub)" in str(episode_type):
-                dub_list.append(str(url) + str(episode_link))
+                dub_list.append(str(url) + "/" + str(str(episode_link).split("/")[-1]))
             else:
-                ep_sub_list.append(str(url) + str(episode_link))
+                ep_sub_list.append(str(url) + "/" + str(str(episode_link).split("/")[-1]))
 
         if len(dub_list) == 0 and len(ep_sub_list) == 0:
             print("Could not find the show links. Report on https://github.com/Xonshiz/anime-dl/issues/new")

@@ -20,3 +20,4 @@
 - Episode Download Range supprt Added [2017.07.07]
 - Added support to include fonts in the muxed videos [2017.07.09]
 - Changed mkvmerge.exe to mkvmerge to support Non-Windows Operating Systems [2017.07.24]
+- Fix for #21 and #22 [2017.10.04]

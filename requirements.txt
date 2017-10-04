@@ -1,2 +1,4 @@
 argparse
 cfscrape
+bs4
+tqdm
