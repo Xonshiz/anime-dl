@@ -101,7 +101,7 @@ Follow the instructions according to your OS :
 ### Windows
 After you've saved this script in a directory/folder, you need to open `command prompt` and browse to that directory and then execute the script. Let's do it step by step :
 * Open the folder where you've downloaded the files of this repository.
-* Hold down the **`SHIFT`** key and while holding down the SHIFT key, **`RIGHT CLICK`** and select `Open Command Prompy Here` from the options that show up.
+* Hold down the **`SHIFT`** key and while holding down the SHIFT key, **`RIGHT CLICK`** and select `Open Command Prompt Here` from the options that show up. <sup>*PowerShell users see below*</sup>
 * Now, in the command prompt, type this :
 
 *If you're using the windows binary :*
@@ -113,6 +113,10 @@ After you've saved this script in a directory/folder, you need to open `command 
 `__main__.py -i "<URL TO THE ANIME>" -u "YourUsername" -p "Password" -r "Resolution"`
 
 URL can be any URL of the [supported websites](https://github.com/Xonshiz/anime-dl/blob/master/Supported_Sites.md).
+
+### PowerShell Note :
+* With Windows 10, the default option when shift-right clicking is to open PowerShell instead of a command window.  When using PowerShell instead of the command prompt, you must make sure that the dependencies directory is in the path or it will not be found.
+* [It is possible to enable `Open Command Window Here` in Windows 10](https://superuser.com/questions/1201988/how-do-i-change-open-with-powershell-to-open-with-command-prompt-when-shift).
 
 ### Linux/Debian
 After you've saved this script in a directory/folder, you need to open `command prompt` and browse to that directory and then execute the script. Let's do it step by step :
