@@ -70,4 +70,4 @@ class main(object):
             if type(args.range) == list:
                 args.range = args.range[0]
 
-            AnimeDL(url= args.input, username=args.username, password=args.password, resolution=args.resolution, language=args.language, skipper=skipper, logger = logger, episode_range=args.range)
+            AnimeDL(url= args.input, username=str(args.username), password=str(args.password), resolution=args.resolution, language=args.language, skipper=skipper, logger = logger, episode_range=args.range)
