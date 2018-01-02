@@ -7,31 +7,37 @@ import subprocess
 class animeName(object):
 
     def nameEdit(self, animeName, episodeNumber, resolution):
-        rawName = str(animeName).title().strip().replace("Season ", "S") + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "]"
-        fileName = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S") + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "].mp4"
+        rawName = str(animeName).title().strip().replace("Season ", "S") + " - " +\
+                  str(episodeNumber).strip() + " [" + str(resolution) + "]"
+        file_name = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S")\
+                   + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "].mp4"
 
         try:
-            MAX_PATH = int(subprocess.check_output(['getconf', 'PATH_MAX', '/']))
-                # print(MAX_PATH)
+            max_path = int(subprocess.check_output(['getconf', 'PATH_MAX', '/']))
+            # print(MAX_PATH)
         except (Exception):
-            MAX_PATH = 4096
+            max_path = 4096
 
-        if len(fileName) > MAX_PATH:
-            file_name = fileName[:MAX_PATH]
+        if len(file_name) > max_path:
+            file_name = file_name[:max_path]
 
-        return fileName
+        return file_name
 
     def nameEditFuni(self, animeName, seasonNumber, episodeNumber, resolution):
-        rawName = str(animeName).title().strip().replace("Season ", "S") + " - " + "S%s E%s" % (str(seasonNumber).strip(), str(episodeNumber).strip()) + " [" + str(resolution) + "]"
-        fileName = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S") + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "].mp4"
+        rawName = str(animeName).title().strip().replace("Season ", "S") + " - " + "S%s E%s" %\
+                                                                                   (str(seasonNumber).strip(),
+                                                                                    str(episodeNumber).strip())\
+                  + " [" + str(resolution) + "]"
+        file_name = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S") \
+                   + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "].mp4"
 
         try:
-            MAX_PATH = int(subprocess.check_output(['getconf', 'PATH_MAX', '/']))
-                # print(MAX_PATH)
+            max_path = int(subprocess.check_output(['getconf', 'PATH_MAX', '/']))
+            # print(MAX_PATH)
         except (Exception):
-            MAX_PATH = 4096
+            max_path = 4096
 
-        if len(fileName) > MAX_PATH:
-            file_name = fileName[:MAX_PATH]
+        if len(file_name) > max_path:
+            file_name = file_name[:max_path]
 
-        return fileName
+        return file_name

@@ -6,12 +6,12 @@ try:
 except ImportError:
      from urlparse import urlparse
 import sites
-from re import match
 from sys import exit
 
 
 '''First, the honcho returns the website name and after that, the corresponding methods are called for a particular
 website. I don't remember why I added an extra step, I really don't. Oh well, it's working, so let it work.'''
+
 
 class AnimeDL(object):
 
@@ -26,7 +26,8 @@ class AnimeDL(object):
             else:
 
                 sites.crunchyroll.CrunchyRoll(
-                    url=url[0], password=password, username=username, resolution=resolution, language=language, skipper=skipper, logger = logger, episode_range=episode_range)
+                    url=url[0], password=password, username=username, resolution=resolution, language=language,
+                    skipper=skipper, logger=logger, episode_range=episode_range)
 
         elif website == "VRV":
             print("Under development...")
@@ -45,7 +46,6 @@ class AnimeDL(object):
                 sites.funimation.Funimation(url[0], username, password, resolution, language)
 
     def honcho(self, url):
-        # print("Got url : %s" % url)
         # Verify that we have a sane url and return which website it belongs
         # to.
 

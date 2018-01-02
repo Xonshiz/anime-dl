@@ -4,10 +4,7 @@
 import cfscrape
 import requests
 import re
-# from os import getcwd, name, remove
-# from os import path, makedirs
 import os
-# from subprocess import call, check_output
 import subprocess
 # External libs have been taken from youtube-dl for decoding the subtitles.
 from external.utils import bytes_to_intlist, intlist_to_bytes
@@ -19,10 +16,9 @@ from hashlib import sha1
 from math import pow, sqrt, floor
 from glob import glob
 from shutil import move
-from sys import exit
 import sys
 import logging
-from anime_dl import animeName
+import animeName
 
 '''This code Stinx. I'll write a better, faster and compact code when I get time after my exams or in mid.
 I literally have NO idea what I was thinking when I wrote this piece of code.

@@ -3,11 +3,8 @@
 
 from cfscrape import create_scraper
 from requests import session
-from bs4 import BeautifulSoup
 import re
-from anime_dl import downloader, animeName
-from subprocess import call
-from time import sleep
+import downloader, animeName
 import json
 
 

@@ -6,8 +6,6 @@ from requests import session
 from tqdm import tqdm
 
 
-
-
 class downloader(object):
 
     def File_Downloader(self, ddl, fileName, referer, cookies):
