@@ -28,6 +28,10 @@ THIS REALLY STINX! Read the code at your own risk.
 
 class CrunchyRoll(object):
     def __init__(self, url, password, username, resolution, language, skipper, logger, episode_range):
+        # print("Username  : {0}".format(username))
+        # print("Type Username  : {0}".format(type(username)))
+        # print("Type Username  : {0}".format(type(password)))
+        # print("Password  : {0}".format(password))
         if logger == "True":
             logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG,
                                 encoding="utf-8")
@@ -95,6 +99,9 @@ class CrunchyRoll(object):
                 data=payload,
                 headers=headers,
                 cookies=initial_cookies)
+
+            # with open("login_source.html", "w")  as wf:
+            #     wf.write(login_post.text.encode('utf-8'))
 
             if self.login_check(htmlsource=login_post.text.encode('utf-8')):
                 print("Logged in successfully...")
@@ -349,6 +356,8 @@ class CrunchyRoll(object):
         sess = requests.session()
         sess = cfscrape.create_scraper(sess)
         page_source = sess.get(url=url, headers=headers, cookies=cookie).text.encode("utf-8")
+        # with open("New_way.html", "w") as wf:
+        #     wf.write(page_source)
 
         dub_list = []
         ep_sub_list = []
@@ -396,7 +405,11 @@ class CrunchyRoll(object):
                     for episode_url in dub_list[::-1]:
                         # cookies, Token = self.webpagedownloader(url=url)
                         # print("Dub list : %s" % dub_list)
-                        self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                        try:
+                            self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                        except Exception as SomeError:
+                            print("Error Downloading : {0}".format(SomeError))
+                            pass
                         print("-----------------------------------------------------------")
                         print("\n")
             else:
@@ -405,7 +418,11 @@ class CrunchyRoll(object):
                 for episode_url in sub_list[::-1]:
                     # cookies, Token = self.webpagedownloader(url=url)
                     # print("Sub list : %s" % sub_list)
-                    self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                    try:
+                        self.singleEpisode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                    except Exception as SomeError:
+                        print("Error Downloading : {0}".format(SomeError))
+                        pass
                     print("-----------------------------------------------------------")
                     print("\n")
 

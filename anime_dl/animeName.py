@@ -7,6 +7,7 @@ import subprocess
 class animeName(object):
 
     def nameEdit(self, animeName, episodeNumber, resolution):
+        animeName = str(animeName).replace("039T", "'")
         rawName = str(animeName).title().strip().replace("Season ", "S") + " - " +\
                   str(episodeNumber).strip() + " [" + str(resolution) + "]"
         file_name = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S")\
