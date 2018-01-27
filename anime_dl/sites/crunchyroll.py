@@ -269,7 +269,7 @@ class CrunchyRoll(object):
                                     subtitles_files.append("--track-name 0:Deutsch --ui-language de --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".arME.ass"):
-                                    subtitles_files.append("--track-name 0:Arabic --ui-language ar --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                    subtitles_files.append("--track-name 0:Arabic --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                         os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".itIT.ass"):
                                     subtitles_files.append("--track-name 0:Italiano --ui-language it --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
