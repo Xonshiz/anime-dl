@@ -1,3 +1,3 @@
-import crunchyroll
-import funimation
-import vrv
+import sites.crunchyroll
+import sites.funimation
+import sites.vrv
