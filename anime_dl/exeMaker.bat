@@ -1,1 +1,1 @@
-pyinstaller --hidden-import=queue --onefile "__main__.py"
+"C:\Python27\Scripts\pyinstaller" --hidden-import=queue --onefile "__main__.py"
