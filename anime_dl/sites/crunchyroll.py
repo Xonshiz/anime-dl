@@ -196,7 +196,6 @@ class CrunchyRoll(object):
                         print("No RTMP Streams Found...")
                         print(NoRtmpDump)
                 else:
-                    # anime_name = str(re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)).replace("\xc3\xa2\xc2\x80\xc2\x99", "").replace(":", "")
                     anime_name = re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(
                         re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1))).title().strip()
                     episode_number = re.search(r'<episode_number>(.*?)</episode_number>',
@@ -300,7 +299,6 @@ class CrunchyRoll(object):
 
                             subs_files = self.duplicate_remover(subtitles_files)
                             logging.debug("subs_files : %s", subs_files)
-                            #  --attachment-name trebucit.ttf --attachment-mime-type application/x-truetype-font --attach-file ^"G:\Fonts\trebucit.ttf
 
                             font_files = [os.path.realpath(font_file) for font_file in
                                           glob(str(os.getcwd()) + "/Fonts/*.*")]
