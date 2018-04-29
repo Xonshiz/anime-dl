@@ -131,7 +131,7 @@ class CrunchyRoll(object):
         logging.debug("rtmpDumpCommand : %s" % rtmpDumpCommand)
 
         try:
-            subprocess.call(rtmpDumpCommand)
+            subprocess.call(rtmpDumpCommand, shell=True)
         except Exception:
             print("Please make sure that rtmpdump is present in the PATH or THIS DIRECTORY!")
             sys.exit()
@@ -243,7 +243,7 @@ class CrunchyRoll(object):
                                 os.getcwd(),
                                 file_name)
                             logging.debug("ffmpeg_command : %s", ffmpeg_command)
-                            subprocess.call(ffmpeg_command)
+                            subprocess.call(ffmpeg_command, shell=True)
 
                             subtitles_files = []
                             for sub_file in glob("*.ass"):
@@ -320,7 +320,7 @@ class CrunchyRoll(object):
                             logging.debug("mkv_merge_command : %s", mkv_merge_command)
 
                             try:
-                                subprocess.call(mkv_merge_command)
+                                subprocess.call(mkv_merge_command, shell=True)
 
                                 for video_file in glob("*.mkv"):
                                     try:
