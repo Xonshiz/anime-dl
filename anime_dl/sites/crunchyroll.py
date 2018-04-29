@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cfscrape
-import requests
-import re
-import os
-import subprocess
-# External libs have been taken from youtube-dl for decoding the subtitles.
-from external.utils import bytes_to_intlist, intlist_to_bytes
-from external.aes import aes_cbc_decrypt
-from external.compat import compat_etree_fromstring
-import zlib
 import base64
+import logging
+import os
+import re
+import subprocess
+import sys
+import zlib
+from glob import glob
 from hashlib import sha1
 from math import pow, sqrt, floor
-from glob import glob
 from shutil import move
-import sys
-import logging
+
 import animeName
+import cfscrape
+import requests
+from external.aes import aes_cbc_decrypt
+from external.compat import compat_etree_fromstring
+# External libs have been taken from youtube-dl for decoding the subtitles.
+from external.utils import bytes_to_intlist, intlist_to_bytes
 
 '''This code Stinx. I'll write a better, faster and compact code when I get time after my exams or in mid.
 I literally have NO idea what I was thinking when I wrote this piece of code.
@@ -195,7 +196,9 @@ class CrunchyRoll(object):
                         print("No RTMP Streams Found...")
                         print(NoRtmpDump)
                 else:
-                    anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)
+                    # anime_name = str(re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)).replace("\xc3\xa2\xc2\x80\xc2\x99", "").replace(":", "")
+                    anime_name = re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(
+                        re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1))).title().strip()
                     episode_number = re.search(r'<episode_number>(.*?)</episode_number>',
                                                xml_page.decode("utf-8")).group(1)
                     video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
@@ -205,15 +208,23 @@ class CrunchyRoll(object):
 
                     file_name = animeName.animeName().nameEdit(animeName=anime_name, episodeNumber=episode_number,
                                                                resolution=video_resolution)
+
+                    output_directory = os.path.abspath("Output" + os.sep + str(anime_name) + "/")
+                    # print("output_directory : {0}".format(output_directory))
+
+                    if not os.path.exists("Output"):
+                        os.makedirs("Output")
+                    if not os.path.exists(output_directory):
+                        os.makedirs(output_directory)
+
+                    file_location = str(output_directory) + os.sep + str(file_name).replace(".mp4", ".mkv")
+
                     logging.debug("anime_name : %s", anime_name)
                     logging.debug("episode_number : %s", episode_number)
                     logging.debug("video_resolution : %s", video_resolution)
                     logging.debug("file_name : %s", file_name)
 
-                    if not os.path.exists("Output"):
-                        os.makedirs("Output")
-
-                    if os.path.isfile("Output/" + file_name):
+                    if os.path.isfile(file_location):
                         print('[Anime-dl] File Exists! Skipping %s\n' % file_name)
                         pass
                     else:
@@ -247,8 +258,9 @@ class CrunchyRoll(object):
                                             os.path.realpath(sub_file)) + '" ')
 
                                 elif sub_file.endswith(".esLA.ass"):
-                                    subtitles_files.append("--track-name 0:Espanol --ui-language es --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
-                                        os.path.realpath(sub_file)) + '" ')
+                                    subtitles_files.append(
+                                        "--track-name 0:Espanol --ui-language es --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".esES.ass"):
                                     subtitles_files.append(
                                         "--track-name 0:Espanol(Espana) --ui-language es --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
@@ -266,28 +278,36 @@ class CrunchyRoll(object):
                                         "--track-name 0:Francais(France) --ui-language fr --language 0:fre --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                                             os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".deDE.ass"):
-                                    subtitles_files.append("--track-name 0:Deutsch --ui-language de --language 0:ger --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
-                                        os.path.realpath(sub_file)) + '" ')
+                                    subtitles_files.append(
+                                        "--track-name 0:Deutsch --ui-language de --language 0:ger --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".arME.ass"):
-                                    subtitles_files.append("--track-name 0:Arabic --language 0:ara --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
-                                        os.path.realpath(sub_file)) + '" ')
+                                    subtitles_files.append(
+                                        "--track-name 0:Arabic --language 0:ara --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".itIT.ass"):
-                                    subtitles_files.append("--track-name 0:Italiano --ui-language it --language 0:ita --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
-                                        os.path.realpath(sub_file)) + '" ')
+                                    subtitles_files.append(
+                                        "--track-name 0:Italiano --ui-language it --language 0:ita --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
                                 elif sub_file.endswith(".trTR.ass"):
-                                    subtitles_files.append("--track-name 0:Turkce --ui-language tr --language 0:tur --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
-                                        os.path.realpath(sub_file)) + '" ')
+                                    subtitles_files.append(
+                                        "--track-name 0:Turkce --ui-language tr --language 0:tur --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
                                 else:
-                                    subtitles_files.append("--track-name 0:und --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
-                                        os.path.realpath(sub_file)) + '" ')
+                                    subtitles_files.append(
+                                        "--track-name 0:und --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                                            os.path.realpath(sub_file)) + '" ')
 
                             subs_files = self.duplicate_remover(subtitles_files)
                             logging.debug("subs_files : %s", subs_files)
                             #  --attachment-name trebucit.ttf --attachment-mime-type application/x-truetype-font --attach-file ^"G:\Fonts\trebucit.ttf
 
-                            font_files = [os.path.realpath(font_file) for font_file in glob(str(os.getcwd()) + "/Fonts/*.*")]
+                            font_files = [os.path.realpath(font_file) for font_file in
+                                          glob(str(os.getcwd()) + "/Fonts/*.*")]
 
-                            fonts = '--attachment-mime-type application/x-truetype-font --attach-file "' + str('" --attachment-mime-type application/x-truetype-font --attach-file "'.join(font_files)) + '"'
+                            fonts = '--attachment-mime-type application/x-truetype-font --attach-file "' + str(
+                                '" --attachment-mime-type application/x-truetype-font --attach-file "'.join(
+                                    font_files)) + '"'
 
                             if len(font_files) == 0:
                                 fonts = ''
@@ -304,7 +324,7 @@ class CrunchyRoll(object):
 
                                 for video_file in glob("*.mkv"):
                                     try:
-                                        move(video_file, "Output")
+                                        move(video_file, output_directory)
                                     except Exception as e:
                                         print(str(e))
                                         pass
@@ -322,13 +342,13 @@ class CrunchyRoll(object):
 
                                 for video_file in glob("*.mp4"):
                                     try:
-                                        move(video_file, "Output")
+                                        move(video_file, output_directory)
                                     except Exception as e:
                                         print(str(e))
                                         pass
                                 for sub_files in glob("*.ass"):
                                     try:
-                                        move(sub_files, "Output")
+                                        move(sub_files, output_directory)
                                     except Exception as e:
                                         print(str(e))
                                         pass
@@ -414,7 +434,7 @@ class CrunchyRoll(object):
                         print("\n")
             else:
                 print("Total Episodes to download : %s" % len(sub_list))
-                
+
                 for episode_url in sub_list[::-1]:
                     # cookies, Token = self.webpagedownloader(url=url)
                     # print("Sub list : %s" % sub_list)
@@ -495,7 +515,10 @@ class CrunchyRoll(object):
             video_id, url)
         xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text.encode("utf-8")
 
-        anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)
+        # anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)
+        anime_name = re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '',
+                            str(re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1))).title().strip()
+
         episode_number = re.search(r'<episode_number>(.*?)</episode_number>', xml_page.decode("utf-8")).group(1)
         video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
         video_height = re.search(r'<height>(.*?)</height>', xml_page.decode("utf-8")).group(1)
@@ -504,14 +527,20 @@ class CrunchyRoll(object):
 
         file_name = animeName.animeName().nameEdit(animeName=anime_name, episodeNumber=episode_number,
                                                    resolution=video_resolution)
+
+        output_directory = os.path.abspath("Output" + os.sep + str(anime_name) + os.sep)
+
         if not os.path.exists("Output"):
             os.makedirs("Output")
+
+        if not os.path.exists(output_directory):
+            os.makedirs(output_directory)
 
         self.subFetcher(xml=xml_page, episode_number=episode_number, file_name=file_name)
 
         for sub_file in glob("*.ass"):
             try:
-                move(sub_file, current_directory + "/Output/")
+                move(sub_file, current_directory + os.sep + "Output" + os.sep)
             except Exception as e:
                 print("Couldn't move the file. Got following error : \n")
                 print(e)
