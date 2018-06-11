@@ -56,6 +56,10 @@ The instructions for all the OS would remain same. Download [`THIS REPOSITORY`](
 
 **Windows users**, it's better to not place it places where it requires administrator privileges. Good example of places to avoid would be `C:\Windows` etc.. This goes for both, the Python script and the windows binary file (.exe).
 
+**Debian 7/8/9 users**, run this command to automatically install anime-dl into your CWD:
+
+`curl https://raw.githubusercontent.com/Xonshiz/anime-dl/auto.sh | sudo bash`
+
 **Linux/Debian** users make sure that this script is executable.Just run this command, if you run into problem(s) :
 
 `chmod +x anime-dl.py`
