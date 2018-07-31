@@ -58,7 +58,7 @@ The instructions for all the OS would remain same. Download [`THIS REPOSITORY`](
 
 **Debian 7/8/9 users**, run this command to automatically install anime-dl into your CWD:
 
-`curl https://raw.githubusercontent.com/Xonshiz/anime-dl/auto.sh | sudo bash`
+`curl https://raw.githubusercontent.com/Xonshiz/anime-dl/master/auto.sh | sudo bash`
 
 **Linux/Debian** users make sure that this script is executable.Just run this command, if you run into problem(s) :
 
