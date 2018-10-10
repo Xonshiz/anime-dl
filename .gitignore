@@ -59,6 +59,7 @@ Temporary Items
 *.spec
 *.iml
 anime_dl/build/__main__/warn__main__.txt
+.idea
 *.ass
 *.mp4
 *.log

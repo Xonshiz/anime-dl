@@ -60,12 +60,13 @@ class CrunchyRoll(object):
         # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
         # If this is not found, you're probably not logged in and you'll just get 360p or 480p.
 
-        titleCheck = re.search(r'\<title\>(.*?)\</title\>',
-                               str(htmlsource)).group(1)
-        if str(titleCheck) == "Redirecting...":
-            return True
-        else:
-            return False
+        # titleCheck = re.search(r'\<title\>(.*?)\</title\>',
+        #                        str(htmlsource)).group(1)
+        # if str(titleCheck) == "Redirecting...":
+        #     return True
+        # else:
+        #     return False
+        return True
 
     def webpagedownloader(self, url, username, password):
 

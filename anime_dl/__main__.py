@@ -5,8 +5,8 @@
 __author__ = "Xonshiz"
 __email__ = "xonshiz@psychoticelites.com"
 """
-
 from AnimeDL import *
+# from AnimeDL import *
 # from anime_dl import AnimeDL
 from sys import exit
 from version import __version__
