@@ -11,7 +11,7 @@ class animeName(object):
         rawName = str(animeName).title().strip().replace("Season ", "S") + " - " +\
                   str(episodeNumber).strip() + " [" + str(resolution) + "]"
         file_name = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S")\
-                   + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "].mp4"
+                   + " - " + str(episodeNumber.zfill(2)).strip() + " [" + str(resolution) + "].mp4"
 
         try:
             max_path = int(subprocess.check_output(['getconf', 'PATH_MAX', '/']))
@@ -30,7 +30,7 @@ class animeName(object):
                                                                                     str(episodeNumber).strip())\
                   + " [" + str(resolution) + "]"
         file_name = str(re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(animeName))).title().strip().replace("Season ", "S") \
-                   + " - " + str(episodeNumber).strip() + " [" + str(resolution) + "].mp4"
+                   + " - " + str(episodeNumber.zfill(2)).strip() + " [" + str(resolution) + "].mp4"
 
         try:
             max_path = int(subprocess.check_output(['getconf', 'PATH_MAX', '/']))
