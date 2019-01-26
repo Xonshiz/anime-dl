@@ -196,13 +196,13 @@ class CrunchyRoll(object):
             xml_page = xml_page_connect.text.encode("utf-8")
 
             try:
-                m3u8_file_link = str(re.search(r'<file>(.*?)</file>', xml_page.decode("utf-8")).group(1)).replace("&amp;", "&")
+                m3u8_file_link = str(re.search(r'<file>(.*?)</file>', xml_page).group(1)).replace("&amp;", "&")
                 logging.debug("m3u8_file_link : %s", m3u8_file_link)
 
                 if not m3u8_file_link:
                     # If no m3u8 found, try the rtmpdump...
                     try:
-                        host_link = re.search(r'<host>(.*?)</host>', xml_page.decode("utf-8")).group(1)
+                        host_link = re.search(r'<host>(.*?)</host>', xml_page).group(1)
                         logging.debug("Found RTMP DUMP!")
                         print("RTMP streams not supported currently...")
                     except Exception as NoRtmpDump:
@@ -210,7 +210,7 @@ class CrunchyRoll(object):
                         print(NoRtmpDump)
                 else:
                     anime_name = re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(
-                        re.search(r'<series_title>(.*?)</series_title>', xml_page.decode("utf-8")).group(1))).title().strip()
+                        re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1))).title().strip()
                     episode_number = re.search(r'<episode_number>(.*?)</episode_number>',
                                                xml_page.decode("utf-8")).group(1)
                     video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
@@ -241,7 +241,7 @@ class CrunchyRoll(object):
                         pass
                     else:
                         self.subFetcher(
-                            xml=str(xml_page.decode("utf-8")),
+                            xml=str(xml_page),
                             episode_number=episode_number,
                             file_name=file_name)
 
@@ -527,9 +527,9 @@ class CrunchyRoll(object):
             video_id, url)
         xml_page = sess.get(url=infoURL, headers=headers, cookies=cookies).text.encode("utf-8")
 
-        # anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page.decode("utf-8")).group(1)
+        # anime_name = re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1)
         anime_name = re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '',
-                            str(re.search(r'<series_title>(.*?)</series_title>', xml_page.decode("utf-8")).group(1))).title().strip()
+                            str(re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1))).title().strip()
 
         episode_number = re.search(r'<episode_number>(.*?)</episode_number>', xml_page.decode("utf-8")).group(1)
         video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
@@ -548,7 +548,7 @@ class CrunchyRoll(object):
         if not os.path.exists(output_directory):
             os.makedirs(output_directory)
 
-        self.subFetcher(xml=xml_page.decode('utf-8'), episode_number=episode_number, file_name=file_name)
+        self.subFetcher(xml=xml_page, episode_number=episode_number, file_name=file_name)
 
         for sub_file in glob("*.ass"):
             try:
