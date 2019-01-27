@@ -23,7 +23,9 @@ from external.utils import bytes_to_intlist, intlist_to_bytes
 
 '''This code Stinx. I'll write a better, faster and compact code when I get time after my exams or in mid.
 I literally have NO idea what I was thinking when I wrote this piece of code.
-THIS REALLY STINX! Read the code at your own risk.
+THIS REALLY STINX!
+Also, some strangers went here and wrote some more code that REALLY REALLY STINX.
+Read the code at your own risk.
 '''
 
 
@@ -37,24 +39,34 @@ class CrunchyRoll(object):
             logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG,
                                 encoding="utf-8")
 
-        Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
-        Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
+        # Extract the language from the input URL
+        Crunchy_Language = re.search(r'.+/([a-z]{2})/.+', url)
+        if not Crunchy_Language:
+            print("Could not extract the language from the URL")
+            return
+
+        Crunchy_Language = Crunchy_Language.group(1)
+
+
+        Crunchy_Show_regex = r'https?://(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.com/[a-z]{2}/(?!(?:news|anime-news|library|forum|launchcalendar|lineup|store|comics|freetrial|login))(?P<id>[\w\-]+))/?(?:\?|$)'
+        Crunchy_Video_regex = r'https?:\/\/(?:(?P<prefix>www|m)\.)?(?P<url>crunchyroll\.(?:com|fr)/[a-z]{2}/(?:media(?:-|/\?id=)|[^/]*/[^/?&]*?)(?P<video_id>[0-9]+))(?:[/?&]|$)'
 
         Crunchy_Show = re.match(Crunchy_Show_regex, url)
         Crunchy_Video = re.match(Crunchy_Video_regex, url)
 
         if Crunchy_Video:
-            cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
+            cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0], country=Crunchy_Language)
             if skipper == "yes":
                 self.onlySubs(url=url, cookies=cookies)
             else:
                 self.singleEpisode(
                     url=url, cookies=cookies, token=Token, resolution=resolution)
         elif Crunchy_Show:
-
-            cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0])
+            cookies, Token = self.webpagedownloader(url=url, username=username[0], password=password[0], country=Crunchy_Language)
             self.wholeShow(url=url, cookie=cookies, token=Token, language=language, resolution=resolution,
                            skipper=skipper, episode_range=episode_range)
+        else:
+            print("URL does not look like a show or a video, stopping.")
 
     def login_check(self, htmlsource):
         # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
@@ -68,20 +80,20 @@ class CrunchyRoll(object):
         #     return False
         return True
 
-    def webpagedownloader(self, url, username, password):
+    def webpagedownloader(self, url, username, password, country='fr'):
 
         headers = {
             'User-Agent':
                 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
             'Referer':
-                'https://www.crunchyroll.com/login'
+                'https://www.crunchyroll.com/' + country + '/login'
         }
 
         sess = requests.session()
         sess = cfscrape.create_scraper(sess)
         print("Trying to login...")
 
-        initial_page_fetch = sess.get(url='https://www.crunchyroll.com/login', headers=headers)
+        initial_page_fetch = sess.get(url='https://www.crunchyroll.com/' + country + '/login', headers=headers)
 
         if initial_page_fetch.status_code == 200:
             initial_page_source = initial_page_fetch.text.encode("utf-8")
@@ -97,7 +109,7 @@ class CrunchyRoll(object):
             }
 
             login_post = sess.post(
-                url='https://www.crunchyroll.com/login',
+                url='https://www.crunchyroll.com/' + country + '/login',
                 data=payload,
                 headers=headers,
                 cookies=initial_cookies)
@@ -453,6 +465,7 @@ class CrunchyRoll(object):
             'Referer':
                 'https://www.crunchyroll.com'
         }
+
 
         sess = requests.session()
         sess = cfscrape.create_scraper(sess)
