@@ -173,22 +173,36 @@ class CrunchyRoll(object):
 
         info_url = ""
 
+        resolution_to_find = None
+
         if str(resolution).lower() in ['1080p', '1080', 'fhd', 'best']:
             info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=108&video_quality=80&current_page=%s" % (
                 video_id, url)
+            resolution_to_find = "1920x1080"
 
         elif str(resolution).lower() in ['720p', '720', 'hd']:
             info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=62&current_page=%s" % (
                 video_id, url)
+            resolution_to_find = "1280x720"
 
         elif str(resolution).lower() in ['480p', '480', 'sd']:
             info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
                 video_id, url)
+            resolution_to_find = "848x480"
         elif str(resolution).lower() in ['360p', '360', 'cancer']:
             info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
                 video_id, url)
+            resolution_to_find = "640x360"
+        elif str(resolution).lower() in ['240p', '240', 'supracancer']:
+            info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
+                video_id, url)
+            resolution_to_find = "428x240"
 
         logging.debug("info_url : %s", info_url)
+
+        if resolution_to_find is None:
+            print('Unknown requested resolution %s' % str(resolution).lower())
+            return
 
         xml_page_connect = sess.get(url=info_url, headers=headers, cookies=cookies)
 
@@ -213,8 +227,10 @@ class CrunchyRoll(object):
                         re.search(r'<series_title>(.*?)</series_title>', xml_page).group(1))).title().strip()
                     episode_number = re.search(r'<episode_number>(.*?)</episode_number>',
                                                xml_page.decode("utf-8")).group(1)
-                    video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
-                    video_height = re.search(r'<height>(.*?)</height>', xml_page.decode("utf-8")).group(1)
+
+                    #video_width = re.search(r'<width>(.*?)</width>', xml_page.decode("utf-8")).group(1)
+                    #video_height = re.search(r'<height>(.*?)</height>', xml_page.decode("utf-8")).group(1)
+                    video_width, video_height = resolution_to_find.split("x")
 
                     video_resolution = str(video_width) + "x" + str(video_height)
 
@@ -247,7 +263,22 @@ class CrunchyRoll(object):
 
                         m3u8_file_connect = sess.get(url=m3u8_file_link, cookies=cookies, headers=headers)
                         try:
-                            m3u8_file_text = m3u8_file_connect.text.splitlines()[2]
+                            #m3u8_file_text = m3u8_file_connect.text.splitlines()[2]
+                            m3u8_file_text = None
+
+                            next_line_is_good = False
+                            for i, currentLine in enumerate(m3u8_file_connect.text.splitlines()):
+                                if next_line_is_good:
+                                    m3u8_file_text = currentLine
+                                    logging.debug("file to download : %s", m3u8_file_text)
+                                    break
+                                elif currentLine.startswith("#EXT-X") and resolution_to_find in currentLine:
+                                    next_line_is_good = True
+
+                            if m3u8_file_text is None:
+                                print('Could not find the requested resolution %s in the m3u8 file\n' % file_name)
+                                return
+
                             logging.debug("m3u8_file_text : %s", m3u8_file_text)
 
                             ffmpeg_command = 'ffmpeg -i "{0}" -c copy -bsf:a aac_adtstoasc "{1}/{2}"'.format(
