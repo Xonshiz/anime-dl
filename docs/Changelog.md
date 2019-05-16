@@ -30,3 +30,5 @@
 - Fix for #46 [2018.01.29]
 - Fix for #45 [2018.01.29]
 - Temp fix for login #65, #66 [2018.10.11]
+- Login Issue Fixed [2019.05.16]
+- Re-structured the code for better maintainance and re-usability. [2019.05.16]

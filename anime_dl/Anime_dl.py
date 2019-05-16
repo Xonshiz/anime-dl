@@ -25,12 +25,13 @@ class AnimeDL(object):
                 exit()
             else:
 
-                sites.crunchyroll.CrunchyRoll(
+                sites.crunchyroll.Crunchyroll(
                     url=url[0], password=password, username=username, resolution=resolution, language=language,
                     skipper=skipper, logger=logger, episode_range=episode_range)
 
         elif website == "VRV":
-            print("Under development...")
+            print("Not Implemented")
+            exit(1)
             # if not url[0] or not username[0] or not password[0]:
             #     print("Please enter the required arguments. Run __main__.py --help")
             #     exit()
@@ -39,11 +40,13 @@ class AnimeDL(object):
             #     sites.vrv.Vrv(url=url, password=password, username=username, resolution=resolution)
 
         elif website == "Funimation":
-            if not url[0] or not username[0] or not password[0]:
-                print("Please enter the required arguments. Run __main__.py --help")
-                exit()
-            else:
-                sites.funimation.Funimation(url[0], username, password, resolution, language)
+            print("Not Implemented")
+            exit(1)
+            # if not url[0] or not username[0] or not password[0]:
+            #     print("Please enter the required arguments. Run __main__.py --help")
+            #     exit()
+            # else:
+            #     sites.funimation.Funimation(url[0], username, password, resolution, language)
 
     def honcho(self, url):
         # Verify that we have a sane url and return which website it belongs

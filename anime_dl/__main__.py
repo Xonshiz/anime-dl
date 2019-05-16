@@ -3,11 +3,9 @@
 
 """
 __author__ = "Xonshiz"
-__email__ = "xonshiz@psychoticelites.com"
+__email__ = "xonshiz@gmail.com"
 """
-from AnimeDL import *
-# from AnimeDL import *
-# from anime_dl import AnimeDL
+from Anime_dl import *
 from sys import exit
 from version import __version__
 import argparse
@@ -15,9 +13,9 @@ import logging
 import platform
 
 
-class main():
+class Main():
     if __name__ == '__main__':
-        parser = argparse.ArgumentParser(description='Anime_DL downloads anime from CrunchyRoll and Funimation.')
+        parser = argparse.ArgumentParser(description='anime_dl downloads anime from CrunchyRoll and Funimation.')
 
         parser.add_argument('--version', action='store_true', help='Shows version and exits.')
 
@@ -39,14 +37,14 @@ class main():
         if args.verbose:
             logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG)
             logging.debug('You have successfully set the Debugging On.')
-            logging.debug("Arguments Provided : %s" % (args))
+            logging.debug("Arguments Provided : {0}".format(args))
             logging.debug(
-                "Operating System : %s - %s - %s" % (platform.system(), platform.release(), platform.version()))
-            logging.debug("Python Version : %s (%s)" % (platform.python_version(), platform.architecture()[0]))
+                "Operating System : {0} - {1} - {2}".format(platform.system(), platform.release(), platform.version()))
+            logging.debug("Python Version : {0} ({1})".format(platform.python_version(), platform.architecture()[0]))
             logger = "True"
 
         if args.version:
-            print("Current Version : %s" % __version__)
+            print("Current Version : {0}".format(__version__))
             exit()
 
         if args.skip:
