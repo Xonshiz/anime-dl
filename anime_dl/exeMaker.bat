@@ -1,1 +1,1 @@
-pyinstaller --hidden-import=queue --onefile "__main__.py"
+pyinstaller --hidden-import=queue --onefile "__main__.spec"
