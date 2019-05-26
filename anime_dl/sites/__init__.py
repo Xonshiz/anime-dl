@@ -1,1 +1,1 @@
-import crunchyroll
+from . import crunchyroll

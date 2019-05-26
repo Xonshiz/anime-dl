@@ -1,4 +1,4 @@
-import aes
-import compat
-import socks
-import utils
+from . import aes
+from . import compat
+from . import socks
+from . import utils

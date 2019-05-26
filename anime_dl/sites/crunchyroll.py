@@ -4,7 +4,7 @@
 import logging
 import re
 import anime_dl
-import supporters
+from . import supporters
 import os
 import subprocess
 from glob import glob
@@ -209,7 +209,7 @@ class Crunchyroll(object):
         return anime_name, episode_number, video_resolution
 
     def stream_muxing(self, file_name, subs_files, fonts, output_directory):
-        mkv_merge_command = 'mkvmerge --ui-language en_US --output "%s" ' % str(file_name).replace(".mp4", ".mkv") + '"' + str(file_name) + '" ' + ' '.join(subs_files) + ' ' + str(fonts)
+        mkv_merge_command = 'mkvmerge --output "%s" ' % str(file_name).replace(".mp4", ".mkv") + '"' + str(file_name) + '" ' + ' '.join(subs_files) + ' ' + str(fonts)
 
         logging.debug("mkv_merge_command : %s", mkv_merge_command)
 

@@ -1,3 +1,3 @@
-import browser_instance
-import downloader
-import misc
+from . import browser_instance
+from . import downloader
+from . import misc
