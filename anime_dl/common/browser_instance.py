@@ -36,23 +36,28 @@ def page_downloader(url, scrapper_delay=5, **kwargs):
 
 def login_crunchyroll(url, username, password, country):
     headers = {
-        'User-Agent':
+        'user-agent':
             'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
-        'Referer':
-            'https://www.crunchyroll.com/' + country + 'login'
+        'referer': 'https://www.crunchyroll.com/login',
+        'origin': 'https://www.crunchyroll.com',
+        'upgrade-insecure-requests': '1'
     }
 
     sess = session()
     sess = create_scraper(sess)
     print("Trying to login...")
 
-    initial_page_fetch = sess.get(url='https://www.crunchyroll.com/' + country + 'login', headers=headers)
+    initial_page_fetch = sess.get(url='https://www.crunchyroll.com/login', headers=headers)
 
     if initial_page_fetch.status_code == 200:
         initial_page_source = initial_page_fetch.text.encode("utf-8")
         initial_cookies = sess.cookies
-        csrf_token = re.search(r'login_form\[\_token\]\"\ value\=\"(.*?)\"',
-                               str(initial_page_source)).group(1)
+        csrf_token = ""
+        try:
+            csrf_token = re.search(r'login_form\[_token\]" value="(.*?)"', str(initial_page_source)).group(1)
+        except Exception:
+            csrf_token = re.search(r'login_form\[_token\]" type="hidden" value="(.*?)"',
+                                   str(initial_page_source)).group(1)
 
         payload = {
             'login_form[name]': '%s' % username,
@@ -62,7 +67,7 @@ def login_crunchyroll(url, username, password, country):
         }
 
         login_post = sess.post(
-            url='https://www.crunchyroll.com/' + country + 'login',
+            url='https://www.crunchyroll.com/login',
             data=payload,
             headers=headers,
             cookies=initial_cookies)
