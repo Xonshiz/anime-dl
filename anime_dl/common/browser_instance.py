@@ -9,6 +9,7 @@ import re
 
 def page_downloader(url, scrapper_delay=5, **kwargs):
     headers = kwargs.get("headers")
+    received_cookies = kwargs.get("cookies")
     if not headers:
         headers = {
             'User-Agent':
@@ -19,7 +20,7 @@ def page_downloader(url, scrapper_delay=5, **kwargs):
     sess = session()
     sess = create_scraper(sess, delay=scrapper_delay)
 
-    connection = sess.get(url, headers=headers, cookies=kwargs.get("cookies"))
+    connection = sess.get(url, headers=headers, cookies=received_cookies)
 
     if connection.status_code != 200:
         print("Whoops! Seems like I can't connect to website.")
@@ -31,7 +32,7 @@ def page_downloader(url, scrapper_delay=5, **kwargs):
         page_source = BeautifulSoup(connection.text.encode("utf-8"), "html.parser")
         connection_cookies = sess.cookies
 
-        return True, page_source, connection_cookies
+        return True, page_source, received_cookies
 
 
 def login_crunchyroll(url, username, password, country):
@@ -75,7 +76,7 @@ def login_crunchyroll(url, username, password, country):
         login_check_response, login_cookies = login_check(html_source=login_post.text.encode('utf-8'), cookies=login_post.cookies)
         if login_check_response:
             print("Logged in successfully...")
-            return True, login_cookies, csrf_token
+            return True, initial_cookies, csrf_token
         else:
             print("Unable to Log you in. Check credentials again.")
             return False, None, None

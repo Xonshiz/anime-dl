@@ -77,7 +77,7 @@ class Crunchyroll(object):
                     subs_downloaded = supporters.sub_fetcher.crunchyroll_subs(xml=str(xml_page_connect), episode_number=episode_number, file_name=file_name)
                     if not subs_downloaded:
                         pass
-                    m3u8_downloaded = self.m3u8_downloader(url=m3u8_file_link, cookies=xml_cookies, resolution_to_find=resolution_to_find, file_name=file_name)
+                    m3u8_downloaded = self.m3u8_downloader(url=m3u8_file_link, cookies=cookies, resolution_to_find=resolution_to_find, file_name=file_name)
                     if m3u8_downloaded:
                         sub_files = self.sub_prepare()
                         font_files = [os.path.realpath(font_file) for font_file in

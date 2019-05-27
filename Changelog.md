@@ -34,3 +34,4 @@
 - Re-structured the code for better maintainance and re-usability. [2019.05.16]
 - Fixed #100 [2019.05.26]
 - Fixed #99 [2019.05.26]
+- Fixed cookie issue that prevented downloading of HD and FHD streams [2019.05.27]
