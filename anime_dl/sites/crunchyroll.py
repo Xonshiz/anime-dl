@@ -310,37 +310,37 @@ class Crunchyroll(object):
         for sub_file in glob("*.ass"):
             if sub_file.endswith(".enUS.ass"):
                 subtitles_files.insert(0,
-                                       "--track-name 0:English_US --ui-language en_US --language 0:eng --default-track 0:yes --sub-charset 0:utf-8 " + '"' + str(
+                                       "--track-name 0:English_US --language 0:eng --default-track 0:yes --sub-charset 0:utf-8 " + '"' + str(
                                            os.path.realpath(sub_file)) + '" ')
 
             elif sub_file.endswith(".enGB.ass"):
                 subtitles_files.append(
-                    "--track-name 0:English_UK --ui-language en_US --language 0:eng --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:English_UK --language 0:eng --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
 
             elif sub_file.endswith(".esLA.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Espanol --ui-language es_ES --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Espanol --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".esES.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Espanol_Espana --ui-language es_ES --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Espanol_Espana --language 0:spa --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".ptBR.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Portugues_Brasil --ui-language pt_BR --language 0:por --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Portugues_Brasil --language 0:por --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".ptPT.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Portugues_Portugal --ui-language pt_PT --language 0:por --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Portugues_Portugal --language 0:por --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".frFR.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Francais_France --ui-language fr_FR --language 0:fre --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Francais_France --language 0:fre --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".deDE.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Deutsch --ui-language de_DE --language 0:ger --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Deutsch --language 0:ger --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".arME.ass"):
                 subtitles_files.append(
@@ -348,11 +348,11 @@ class Crunchyroll(object):
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".itIT.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Italiano --ui-language it_IT --language 0:ita --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Italiano --language 0:ita --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             elif sub_file.endswith(".trTR.ass"):
                 subtitles_files.append(
-                    "--track-name 0:Turkce --ui-language tr_TR --language 0:tur --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
+                    "--track-name 0:Turkce --language 0:tur --default-track 0:no --sub-charset 0:utf-8 " + '"' + str(
                         os.path.realpath(sub_file)) + '" ')
             else:
                 subtitles_files.append(

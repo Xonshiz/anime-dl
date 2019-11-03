@@ -5,6 +5,12 @@
 __author__ = "Xonshiz"
 __email__ = "xonshiz@gmail.com"
 """
+import os,sys,inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0,parentdir) 
+import anime_dl
+
 from Anime_dl import *
 from sys import exit
 from version import __version__
