@@ -463,6 +463,10 @@ class Crunchyroll(object):
             info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
                 video_id, url)
             resolution_to_find = "848x480"
+        elif str(resolution).lower() in ['480x360']:
+            info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=61&current_page=%s" % (
+                video_id, url)
+            resolution_to_find = "480x360"
         elif str(resolution).lower() in ['360p', '360', 'cancer']:
             info_url = "http://www.crunchyroll.com/xml/?req=RpcApiVideoPlayer_GetStandardConfig&media_id=%s&video_format=106&video_quality=60&current_page=%s" % (
                 video_id, url)
