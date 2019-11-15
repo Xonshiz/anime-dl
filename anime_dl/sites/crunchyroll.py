@@ -70,7 +70,7 @@ class Crunchyroll(object):
                 output_directory = supporters.path_works.path_creator(anime_name=anime_name)
                 file_location = str(output_directory) + os.sep + str(file_name).replace(".mp4", ".mkv")
 
-                if output is None:
+                if output is None or not os.path.exists(output):
                     output = output_directory
 
                 if os.path.isfile(file_location):
