@@ -12,7 +12,7 @@ from shutil import move
 
 
 class Crunchyroll(object):
-    def __init__(self, url, password, username, resolution, language, skipper, logger, episode_range):
+    def __init__(self, url, password, username, resolution, language, skipper, logger, episode_range, output):
         if logger == "True":
             logging.basicConfig(format='%(levelname)s: %(message)s', filename="Error Log.log", level=logging.DEBUG,
                                 encoding="utf-8")
@@ -39,16 +39,16 @@ class Crunchyroll(object):
                 if skipper == "yes":
                     self.only_subs(url=url, cookies=cookies, resolution=resolution)
                 else:
-                    self.single_episode(url=url, cookies=cookies, token=token, resolution=resolution)
+                    self.single_episode(url=url, cookies=cookies, token=token, resolution=resolution, output=output)
             elif crunchy_show:
-                self.whole_show(url=url, cookie=cookies, token=token, language=language, resolution=resolution, skipper=skipper, episode_range=episode_range)
+                self.whole_show(url=url, cookie=cookies, token=token, language=language, resolution=resolution, skipper=skipper, episode_range=episode_range, output=output)
             else:
                 print("URL does not look like a show or a video, stopping.")
         else:
             print("Failed Login!!!")
             exit(1)
 
-    def single_episode(self, url, cookies, token, resolution):
+    def single_episode(self, url, cookies, token, resolution, output):
         video_id = str(url.split('-')[-1]).replace("/", "")
         logging.debug("video_id : {0}".format(video_id))
 
@@ -69,6 +69,9 @@ class Crunchyroll(object):
                 file_name = supporters.anime_name.crunchyroll_name(anime_name=anime_name, episode_number=episode_number, resolution=video_resolution)
                 output_directory = supporters.path_works.path_creator(anime_name=anime_name)
                 file_location = str(output_directory) + os.sep + str(file_name).replace(".mp4", ".mkv")
+
+                if output is None:
+                    output = output_directory
 
                 if os.path.isfile(file_location):
                     print('[anime-dl] File Exists! Skipping {0}\n'.format(file_name))
@@ -92,7 +95,8 @@ class Crunchyroll(object):
 
                         is_stream_muxed = self.stream_muxing(file_name=file_name, subs_files=sub_files, fonts=fonts, output_directory=output_directory)
                         if is_stream_muxed:
-                            is_file_moved = self.move_video_file(output_directory = output_directory)
+                            is_file_moved = self.move_video_file(output_directory = output)
+                            print("Moved file to", output)
                             if is_file_moved:
                                 is_cleaned = self.material_cleaner()
                                 if is_cleaned:
@@ -116,7 +120,7 @@ class Crunchyroll(object):
             print("Couldn't Connect To XML Page.")
             pass
 
-    def whole_show(self, url, cookie, token, language, resolution, skipper, episode_range):
+    def whole_show(self, url, cookie, token, language, resolution, skipper, episode_range, output):
         response, page_source, episode_list_cookies = anime_dl.common.browser_instance.page_downloader(url=url, cookies=cookie)
 
         if response:
@@ -147,7 +151,7 @@ class Crunchyroll(object):
                             # cookies, Token = self.webpagedownloader(url=url)
                             # print("Dub list : %s" % dub_list)
                             try:
-                                self.single_episode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                                self.single_episode(url=episode_url, cookies=cookie, token=token, resolution=resolution, output=output)
                             except Exception as SomeError:
                                 print("Error Downloading : {0}".format(SomeError))
                                 pass
@@ -160,7 +164,7 @@ class Crunchyroll(object):
                         # cookies, Token = self.webpagedownloader(url=url)
                         # print("Sub list : %s" % sub_list)
                         try:
-                            self.single_episode(url=episode_url, cookies=cookie, token=token, resolution=resolution)
+                            self.single_episode(url=episode_url, cookies=cookie, token=token, resolution=resolution, output=output)
                         except Exception as SomeError:
                             print("Error Downloading : {0}".format(SomeError))
                             pass
