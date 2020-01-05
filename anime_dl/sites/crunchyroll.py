@@ -206,7 +206,7 @@ class Crunchyroll(object):
 
     def episode_information_extractor(self, page_source, resolution_to_find):
         anime_name = re.sub(r'[^A-Za-z0-9\ \-\' \\]+', '', str(re.search(r'<series_title>(.*?)</series_title>', page_source).group(1))).title().strip()
-        episode_number = re.search(r'<episode_number>(.*?)</episode_number>', page_source.decode("utf-8")).group(1)
+        episode_number = re.search(r'<episode_number>(.*?)</episode_number>', page_source).group(1)
         video_width, video_height = resolution_to_find.split("x")
         video_resolution = str(video_width) + "x" + str(video_height)
 

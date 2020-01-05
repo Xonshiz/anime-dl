@@ -95,7 +95,7 @@ def login_check(html_source, cookies=None):
         print("Let me check again...")
         second_try_response, html_source, cookies = page_downloader(url="https://www.crunchyroll.com/", cookies=cookies)
         if second_try_response:
-            if "href=\"/logout\"" in html_source:
+            if b'href=\"/logout\"' in html_source:
                 return True, cookies
             else:
                 return False, cookies
