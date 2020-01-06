@@ -89,7 +89,7 @@ def login_crunchyroll(url, username, password, country):
 def login_check(html_source, cookies=None):
     # Open the page and check the title. CrunchyRoll redirects the user and the title has the text "Redirecting...".
     # If this is not found, you're probably not logged in and you'll just get 360p or 480p.
-    if "href=\"/logout\"" in html_source:
+    if b'href="/logout"' in html_source:
         return True, cookies
     else:
         print("Let me check again...")
