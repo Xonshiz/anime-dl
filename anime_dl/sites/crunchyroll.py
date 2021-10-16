@@ -9,7 +9,7 @@ import os
 import subprocess
 from glob import glob
 from shutil import move
-
+from sys import exit
 
 class Crunchyroll(object):
     def __init__(self, url, password, username, resolution, language, skipper, logger, episode_range, output):
